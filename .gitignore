@@ -399,3 +399,19 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+# Configuração local e credenciais
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Backups locais do banco
+*.dump
+*.backup
+
+# Configurações locais do editor
+.idea/
+# Build da interface
+web/dist/
