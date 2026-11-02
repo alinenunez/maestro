@@ -45,4 +45,30 @@ Os arquivos .gitkeep mantêm as pastas vazias no Git.
 
 O servidor verifica a conexão antes de iniciar e escuta apenas no computador local. A rota /health retorna 503 se o banco ficar indisponível. Não usamos sync: as tabelas existentes são preservadas.
 
-`src/app.js` define a aplicação e a rota de teste; `index.js` inicia o servidor; `src/database/connection.js` configura o Sequelize. Autenticação e módulos funcionais serão implementados posteriormente.
+`index.js` configura a aplicação, registra as rotas e inicia o servidor; `src/database/connection.js` configura o Sequelize. Autenticação e módulos funcionais serão implementados posteriormente.
+
+## Cadastro de mesas
+
+O módulo segue routes → controller → service → repository → model Sequelize. O model aponta para a tabela existente mesa_sinuca; não executamos sync.
+
+| Método | Rota | Operação |
+| --- | --- | --- |
+| GET | /mesas | Listar por número |
+| GET | /mesas/:id | Buscar pelo identificador |
+| POST | /mesas | Cadastrar |
+| PATCH | /mesas/:id | Atualizar número e/ou status |
+| DELETE | /mesas/:id | Excluir se não houver reservas vinculadas |
+
+Exemplo de corpo JSON para POST /mesas:
+
+```json
+{"numero_mesa": 1, "status": "disponivel"}
+```
+
+O status é opcional no cadastro e assume disponivel. Os valores aceitos são ocupada, disponivel e manutencao. O número deve ser inteiro positivo e único. O ID é gerado pelo banco e não deve ser enviado no corpo.
+
+Para mudar apenas o status, envie PATCH /mesas/1 com `{"status":"manutencao"}`. O status representa a condição atual; a agenda de reservas será implementada em outra etapa.
+
+Respostas: 201 para criação, 200 para consultas/atualização, 204 para exclusão, 400 para campos inválidos, 404 para mesa inexistente, 409 para número duplicado ou exclusão impedida por reservas. Erros internos não expõem detalhes do banco.
+
+Execute `npm test` para os testes HTTP com o repository simulado, sem alterar o banco. Autenticação ainda não foi implementada; execute esta etapa apenas localmente.
