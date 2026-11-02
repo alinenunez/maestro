@@ -31,6 +31,18 @@ Tecnologias: Node.js, Express e Sequelize no servidor; PostgreSQL no banco; Reac
 
 Cada módulo reunirá rotas, controller, service e repository, seguindo o projeto da aula. Os módulos são usuarios, produtos, vendas, despesas, estoque, mesas e reservas.
 
-A pasta src/auth será usada para autenticação, com as estratégias Passport e verificações de acesso em auth.config.js, seguindo o template da aula; src/database/models, para modelos Sequelize. A conexão ficará em src/database/connection.js e o ponto de entrada será main.js na raiz. Esses arquivos serão implementados nas próximas etapas.
+A pasta src/auth será usada para autenticação, com as estratégias Passport e verificações de acesso em auth.config.js, src/database/models, para modelos Sequelize. A conexão ficará em src/database/connection.js e o ponto de entrada é index.js na raiz. 
 
 Os arquivos .gitkeep mantêm as pastas vazias no Git.
+
+## Executar o servidor
+
+1. Instale as dependências com `npm install`.
+2. Em outro computador, copie `.env.example` para `.env`. Nesta configuração local, o arquivo já foi criado.
+3. Preencha `DB_PASSWORD` no `.env` e confira host, porta, usuário e nome exato do banco no pgAdmin. Se a senha contiver #, coloque o valor entre aspas duplas.
+4. Execute `npm run dev` para reiniciar automaticamente após alterações, ou `npm start`.
+5. Acesse http://localhost:3000/health. Com o banco conectado, a resposta será `{"status":"ok","banco":"conectado"}`.
+
+O servidor verifica a conexão antes de iniciar e escuta apenas no computador local. A rota /health retorna 503 se o banco ficar indisponível. Não usamos sync: as tabelas existentes são preservadas.
+
+`src/app.js` define a aplicação e a rota de teste; `index.js` inicia o servidor; `src/database/connection.js` configura o Sequelize. Autenticação e módulos funcionais serão implementados posteriormente.
