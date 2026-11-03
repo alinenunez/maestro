@@ -1,5 +1,20 @@
 const connection = require("./src/database/connection");
-const app = require("./src/app");
+const express = require("express");
+
+const app = express();
+app.use(express.json());
+
+app.get("/health", async (req, res) => {
+    try {
+        await connection.authenticate();
+        return res.status(200).json({ status: "ok", banco: "conectado" });
+    } catch {
+        return res.status(503).json({ status: "indisponivel", banco: "desconectado" });
+    }
+});
+
+app.use("/mesas", require("./src/mesas/mesas.routes"));
+app.use("/produtos", require("./src/produtos/produtos.routes"));
 const port = Number(process.env.PORT || 3000);
 
 async function iniciar() {
@@ -33,4 +48,9 @@ async function iniciar() {
     process.once("SIGTERM", encerrar);
 }
 
-iniciar();
+// Inicia apenas quando executado diretamente; permite importar a aplicação nos testes.
+if (require.main === module) {
+    iniciar();
+}
+
+module.exports = app;

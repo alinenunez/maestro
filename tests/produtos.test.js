@@ -1,0 +1,45 @@
+const { test } = require("node:test");
+const assert = require("node:assert/strict");
+const repository = require("../src/produtos/produtos.repository");
+const db = require("../src/database/connection");
+const app = require("../index");
+test("Produtos: CRUD, campos invalidos e estoque automatico de fichas", async () => {
+    let produto = null;
+    repository.listar = async () => produto ? [produto] : [];
+    repository.buscarPorId = async id => produto?.id_produto === id ? produto : null;
+    repository.criar = async dados => produto = { id_produto: 1, ...dados };
+    repository.atualizar = async (id, dados) => produto?.id_produto === id ? produto = { ...produto, ...dados } : null;
+    repository.remover = async () => { throw Object.assign(new Error(), { name: "SequelizeForeignKeyConstraintError" }); };
+    const server = app.listen(0, "127.0.0.1");
+    await new Promise(resolve => server.once("listening", resolve));
+    const url = `http://127.0.0.1:${server.address().port}/produtos`;
+    const req = (method, path = "", body) => fetch(url + path, { method, headers: { "Content-Type": "application/json" }, body: body === undefined ? undefined : JSON.stringify(body) });
+    const base = { nome_produto: "Refrigerante", tipo_produto: "bebida", valor_unitario: "5.50", quantidade_produto: 10 };
+    try {
+        assert.deepEqual(await (await req("GET")).json(), []);
+        for (const body of [{}, [], { ...base, nome_produto: " " }, { ...base, tipo_produto: null }, { ...base, valor_unitario: -1 }, { ...base, valor_unitario: "1.234" }, { ...base, valor_unitario: "10000000000" }, { ...base, quantidade_produto: null }, { ...base, quantidade_produto: -1 }, { ...base, id_produto: 99 }]) assert.equal((await req("POST", "", body)).status, 400);
+        assert.equal((await req("GET", "/abc")).status, 400);
+        assert.equal((await req("GET", "/1")).status, 404);
+        let r = await req("POST", "", base);
+        assert.equal(r.status, 201);
+        assert.equal((await r.json()).quantidade_produto, 10);
+        r = await req("PATCH", "/1", { valor_unitario: "7.00" });
+        assert.equal(r.status, 200);
+        assert.equal((await r.json()).quantidade_produto, 10);
+        assert.equal((await req("PATCH", "/1", { quantidade_produto: -1 })).status, 400);
+        r = await req("PATCH", "/1", { tipo_produto: "FICHA_SINUCA", quantidade_produto: 999 });
+        assert.equal((await r.json()).quantidade_produto, 0);
+        r = await req("PATCH", "/1", { quantidade_produto: 30 });
+        assert.equal((await r.json()).quantidade_produto, 0);
+        r = await req("POST", "", { nome_produto: "Ficha", tipo_produto: "ficha_sinuca", valor_unitario: "3.00" });
+        assert.equal(r.status, 201);
+        assert.equal((await r.json()).quantidade_produto, 0);
+        r = await req("PATCH", "/1", { tipo_produto: "bebida", quantidade_produto: 4 });
+        assert.equal((await r.json()).quantidade_produto, 4);
+        assert.equal((await req("PATCH", "/2", { nome_produto: "Outro" })).status, 404);
+        assert.equal((await req("DELETE", "/1")).status, 409);
+        repository.remover = async id => { if (produto?.id_produto !== id) return 0; produto = null; return 1; };
+        assert.equal((await req("DELETE", "/1")).status, 204);
+        assert.equal((await req("DELETE", "/1")).status, 404);
+    } finally { await new Promise(resolve => server.close(resolve)); await db.close(); }
+});

@@ -1,1 +1,22 @@
-{"name":"maestro","version":"1.0.0","private":true,"description":"API do Sistema Maestro","main":"index.js","scripts":{"start":"node index.js","dev":"node --watch index.js"},"engines":{"node":">=22"},"dependencies":{"dotenv":"^18.0.9","express":"^5.3.0","pg":"^8.23.1","pg-hstore":"^2.3.4","sequelize":"^6.37.8"}}
+{
+  "name": "maestro",
+  "version": "1.0.0",
+  "private": true,
+  "description": "API do Sistema Maestro",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "dotenv": "^18.0.9",
+    "express": "^5.3.0",
+    "pg": "^8.23.1",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.37.8"
+  }
+}
