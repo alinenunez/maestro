@@ -15,6 +15,7 @@ app.get("/health", async (req, res) => {
 
 app.use("/mesas", require("./src/mesas/mesas.routes"));
 app.use("/produtos", require("./src/produtos/produtos.routes"));
+app.use("/usuarios", require("./src/usuarios/usuarios.routes"));
 const port = Number(process.env.PORT || 3000);
 
 async function iniciar() {

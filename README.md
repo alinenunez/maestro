@@ -100,3 +100,44 @@ A rota `GET /produtos` aceita os parâmetros opcionais `nome` e `tipo`:
 Filtros vazios são ignorados. Tipos inválidos e parâmetros repetidos retornam HTTP 400. Sem resultados, a resposta é um array vazio (`[]`); falhas de consulta retornam erro, sem simular uma lista vazia. Os resultados mantêm a ordenação por nome e ID. A busca trata os caracteres % e _ literalmente e não remove acentos. Na interface, use URLSearchParams para montar a URL com os filtros.
 
 A seleção para vendas deverá guardar o id_produto do resultado, evitando confundir produtos com nomes semelhantes.
+
+## Usuarios e funcionarios
+
+O modulo usa a tabela `usuario` existente, sem funcao/cargo, conforme a decisao do projeto. Segue model, repository, service, controller e routes.
+
+| Metodo | Rota | Operacao |
+| --- | --- | --- |
+| GET | /usuarios | Listar usuarios por nome |
+| GET | /usuarios/:id | Consultar usuario |
+| POST | /usuarios | Cadastrar administrador ou funcionario |
+| PATCH | /usuarios/:id | Atualizar dados ou situacao |
+
+Exemplo de corpo para POST /usuarios (dados ficticios para preenchimento manual):
+
+```json
+{
+  "nome_completo": "Funcionario Exemplo",
+  "cpf": "12345678901",
+  "situacao": true,
+  "data_inicio": "2026-11-08",
+  "tipo_contratacao": "efetivo",
+  "tipo_acesso": "funcionario",
+  "email": "funcionario@example.com",
+  "data_nascimento": "1995-05-20",
+  "senha": "SenhaExemplo123!",
+  "confirmacao_senha": "SenhaExemplo123!"
+}
+```
+
+- `tipo_acesso`: administrador ou funcionario.
+- `tipo_contratacao`: temporario ou efetivo. Por enquanto, o banco exige esse campo e data_inicio inclusive para administradores; a estrutura nao foi alterada.
+- `situacao`: booleano; se omitido no cadastro, assume true. Para inativar, envie PATCH /usuarios/:id com `{"situacao":false}`. Para reativar, envie true. Nao ha exclusao fisica de usuarios.
+- CPF: aceita 11 digitos ou mascara 000.000.000-00; salva somente digitos. A validacao atual e de formato, conforme a restricao do banco, sem verificacao dos digitos verificadores.
+- Email: salva em minusculas. O banco impede CPF e email repetidos, retornados como conflito HTTP 409.
+- Datas: formato AAAA-MM-DD, com validacao de existencia da data.
+- Senha e confirmacao sao obrigatorias no cadastro; em atualizacoes, envie ambas somente quando desejar trocar a senha. Confirmacao nao e armazenada. Apenas o hash bcrypt e salvo; nem senha nem hash sao devolvidos pela API. Senhas acima de 72 bytes sao recusadas para evitar truncamento pelo bcrypt.
+- Campos desconhecidos, incluindo senha_hash enviado pelo cliente, sao recusados.
+
+Autenticacao, verificacao de perfil e recuperacao de senha ficam para a proxima etapa. As rotas atuais sao apenas a base local do cadastro: ainda nao restringem operacoes ao administrador. A inativacao registra a situacao; o bloqueio de login sera implementado com autenticacao. 
+
+Testes automatizados de usuarios ficaram pendentes conforme combinado. A sintaxe dos arquivos foi verificada.
