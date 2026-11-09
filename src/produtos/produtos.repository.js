@@ -1,6 +1,19 @@
 const Produto = require("../database/models/produto.model");
+const { Op } = require("sequelize");
 
-const listar = () => Produto.findAll({ order: [["nome_produto", "ASC"], ["id_produto", "ASC"]] });
+function listar({ nome, tipo } = {}) {
+    const where = {};
+    if (nome) {
+        // Trata %, _ e barra invertida como texto, nao como curingas da busca.
+        const termo = nome.replace(/[\\%_]/g, "\\$&");
+        where.nome_produto = { [Op.iLike]: `%${termo}%` };
+    }
+    if (tipo) where.tipo_produto = tipo;
+    return Produto.findAll({
+        where,
+        order: [["nome_produto", "ASC"], ["id_produto", "ASC"]],
+    });
+}
 const buscarPorId = id => Produto.findByPk(id);
 const criar = dados => Produto.create(dados);
 async function atualizar(id, dados) {

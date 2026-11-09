@@ -45,7 +45,30 @@ function preparar(dados, atual) {
     }
     return resultado;
 }
-const listar = () => repository.listar();
+function listar(filtros = {}) {
+    if (Object.keys(filtros).some(campo => !["nome", "tipo"].includes(campo))) {
+        throw falha("Filtros permitidos: nome e tipo.");
+    }
+    const criterios = {};
+    for (const campo of ["nome", "tipo"]) {
+        if (filtros[campo] !== undefined) {
+            if (typeof filtros[campo] !== "string") {
+                throw falha(`Informe apenas um texto para o filtro ${campo}.`);
+            }
+            criterios[campo] = filtros[campo].trim();
+        }
+    }
+    if (criterios.nome && criterios.nome.length > 150) {
+        throw falha("A busca por nome deve ter no maximo 150 caracteres.");
+    }
+    if (criterios.tipo) {
+        criterios.tipo = criterios.tipo.toLowerCase();
+        if (!tiposPermitidos.includes(criterios.tipo)) {
+            throw falha(`Tipo invalido. Use: ${tiposPermitidos.join(", ")}.`);
+        }
+    }
+    return repository.listar(criterios);
+}
 async function buscarPorId(id) {
     const produto = await repository.buscarPorId(validarId(id));
     if (!produto) throw falha("Produto nao encontrado.", 404);

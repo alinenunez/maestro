@@ -7,7 +7,7 @@ function responderErro(res, erro) {
     return res.status(500).json({ erro: "Nao foi possivel concluir a operacao de produtos." });
 }
 async function listar(req, res) {
-    try { res.json(await service.listar()); } catch (erro) { responderErro(res, erro); }
+    try { res.json(await service.listar(req.query)); } catch (erro) { responderErro(res, erro); }
 }
 async function buscarPorId(req, res) {
     try { res.json(await service.buscarPorId(req.params.id)); } catch (erro) { responderErro(res, erro); }

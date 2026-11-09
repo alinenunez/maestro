@@ -87,3 +87,16 @@ No cadastro e na alteração de tipo, a API aceita os seguintes valores em `tipo
 Espaços nas extremidades são removidos e letras maiúsculas são convertidas em minúsculas. Tipos fora da lista retornam HTTP 400. Fichas continuam com quantidade de estoque zero, definida automaticamente.
 
 Essa validação não modifica registros já cadastrados. Produtos antigos com tipos genéricos, como bebida, precisam ser classificados explicitamente como alcoólicos ou não alcoólicos. Os testes existentes serão adequados em uma etapa posterior.
+
+## Busca e filtro de produtos
+
+A rota `GET /produtos` aceita os parâmetros opcionais `nome` e `tipo`:
+
+- `/produtos`: lista todos os produtos.
+- `/produtos?nome=heineken`: busca parte do nome, sem diferenciar maiúsculas e minúsculas.
+- `/produtos?tipo=bebida_alcoolica`: filtra pela categoria padronizada.
+- `/produtos?nome=heineken&tipo=bebida_alcoolica`: aplica os dois critérios juntos.
+
+Filtros vazios são ignorados. Tipos inválidos e parâmetros repetidos retornam HTTP 400. Sem resultados, a resposta é um array vazio (`[]`); falhas de consulta retornam erro, sem simular uma lista vazia. Os resultados mantêm a ordenação por nome e ID. A busca trata os caracteres % e _ literalmente e não remove acentos. Na interface, use URLSearchParams para montar a URL com os filtros.
+
+A seleção para vendas deverá guardar o id_produto do resultado, evitando confundir produtos com nomes semelhantes.
