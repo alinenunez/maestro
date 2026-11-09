@@ -72,3 +72,18 @@ Para mudar apenas o status, envie PATCH /mesas/1 com `{"status":"manutencao"}`. 
 Respostas: 201 para criação, 200 para consultas/atualização, 204 para exclusão, 400 para campos inválidos, 404 para mesa inexistente, 409 para número duplicado ou exclusão impedida por reservas. Erros internos não expõem detalhes do banco.
 
 Execute `npm test` para os testes HTTP com o repository simulado, sem alterar o banco. Autenticação ainda não foi implementada; execute esta etapa apenas localmente.
+
+## Tipos de produtos
+
+No cadastro e na alteração de tipo, a API aceita os seguintes valores em `tipo_produto`:
+
+| Valor na API | Texto na interface |
+| --- | --- |
+| bebida_alcoolica | Bebida alcoólica |
+| bebida_nao_alcoolica | Bebida não alcoólica |
+| guloseima | Guloseima |
+| ficha_sinuca | Ficha de sinuca |
+
+Espaços nas extremidades são removidos e letras maiúsculas são convertidas em minúsculas. Tipos fora da lista retornam HTTP 400. Fichas continuam com quantidade de estoque zero, definida automaticamente.
+
+Essa validação não modifica registros já cadastrados. Produtos antigos com tipos genéricos, como bebida, precisam ser classificados explicitamente como alcoólicos ou não alcoólicos. Os testes existentes serão adequados em uma etapa posterior.

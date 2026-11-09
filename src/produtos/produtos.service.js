@@ -1,6 +1,12 @@
 const repository = require("./produtos.repository");
 const falha = (mensagem, statusCode = 400) => Object.assign(new Error(mensagem), { statusCode });
 const campos = ["nome_produto", "tipo_produto", "quantidade_produto", "valor_unitario"];
+const tiposPermitidos = [
+    "bebida_alcoolica",
+    "bebida_nao_alcoolica",
+    "guloseima",
+    "ficha_sinuca",
+];
 function validarId(valor) {
     if (!/^[1-9][0-9]*$/.test(String(valor)) || Number(valor) > 2147483647) throw falha("ID do produto invalido.");
     return Number(valor);
@@ -17,7 +23,12 @@ function preparar(dados, atual) {
             resultado[campo] = dados[campo].trim();
         }
     }
-    if (resultado.tipo_produto) resultado.tipo_produto = resultado.tipo_produto.toLowerCase();
+    if (resultado.tipo_produto) {
+        resultado.tipo_produto = resultado.tipo_produto.toLowerCase();
+        if (!tiposPermitidos.includes(resultado.tipo_produto)) {
+            throw falha(`tipo_produto deve ser um dos seguintes: ${tiposPermitidos.join(", ")}.`);
+        }
+    }
     if (!atual || Object.hasOwn(dados, "valor_unitario")) {
         const valor = dados.valor_unitario;
         if (!["number", "string"].includes(typeof valor) || !/^\d{1,10}(\.\d{1,2})?$/.test(String(valor))) throw falha("valor_unitario deve ser nao negativo, com ate 10 digitos inteiros e 2 decimais. Use ponto decimal.");
