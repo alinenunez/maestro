@@ -75,6 +75,7 @@ Nesta etapa não há refresh token, recuperação por email nem endpoint de logo
 | Operação | Administrador | Funcionário |
 | --- | --- | --- |
 | Consultar produtos | Sim | Sim |
+| Registrar e consultar entradas de estoque | Sim | Sim |
 | Criar, editar ou excluir produtos | Sim | Não |
 | Consultar mesas | Sim | Sim |
 | Criar, renumerar ou excluir mesas | Sim | Não |
@@ -85,7 +86,7 @@ Nesta etapa não há refresh token, recuperação por email nem endpoint de logo
 
 `GET /usuarios/responsaveis` fornece apenas ID e nome dos usuários ativos para a futura seleção do responsável pelas vendas. Não libera CPF, email ou outros dados cadastrais aos funcionários. O administrador não pode inativar o próprio acesso.
 
-O mapa de permissões também deixa previstas as operações dos próximos módulos: estoque, vendas, reservas e dashboard para ambos os perfis; despesas e relatórios para administrador. Esses módulos ainda não têm endpoints implementados nesta etapa.
+As rotas de estoque usam a permissão GERENCIAR_ESTOQUE, disponível aos dois perfis. O mapa de permissões também deixa previstas as operações dos próximos módulos: vendas, reservas e dashboard para ambos os perfis; despesas e relatórios para administrador. Esses módulos ainda não têm endpoints implementados nesta etapa.
 
 ## Revisão
 

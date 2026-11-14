@@ -19,7 +19,7 @@ O arquivo `database/scripts/02_consultas_sistema_maestro.sql` contém consultas 
 
 A estrutura inclui nove tabelas. Situação do usuário: TRUE para ativo e FALSE para inativo. Status da mesa: ocupada, disponivel ou manutencao. Uma reserva pode incluir várias mesas e possui duração em minutos.
 
-Ainda serão implementados o bloqueio de reservas sobrepostas, os totais de vendas, as movimentações automáticas de estoque e a validação de pelo menos um item por venda e uma mesa por reserva.
+As entradas de estoque já atualizam o saldo automaticamente. Ainda serão implementados o bloqueio de reservas sobrepostas, os totais de vendas, a baixa de estoque pelas vendas e a validação de pelo menos um item por venda e uma mesa por reserva.
 
 ## Configuração local
 
@@ -45,7 +45,7 @@ Os arquivos .gitkeep mantêm as pastas vazias no Git.
 
 O servidor verifica a conexão antes de iniciar e escuta apenas no computador local. A rota /health retorna 503 se o banco ficar indisponível. Não usamos sync: as tabelas existentes são preservadas.
 
-`index.js` configura a aplicação, registra as rotas e inicia o servidor; `src/database/connection.js` configura o Sequelize. Autenticação e permissões estão configuradas. Estoque, vendas, reservas, despesas e relatórios serão desenvolvidos nas próximas etapas.
+`index.js` configura a aplicação, registra as rotas e inicia o servidor; `src/database/connection.js` configura o Sequelize. Autenticação, permissões e entradas de estoque estão implementadas. Vendas, reservas, despesas e relatórios serão desenvolvidos nas próximas etapas.
 
 ## Cadastro de mesas
 
@@ -100,6 +100,43 @@ A rota `GET /produtos` aceita os parâmetros opcionais `nome` e `tipo`:
 Filtros vazios são ignorados. Tipos inválidos e parâmetros repetidos retornam HTTP 400. Sem resultados, a resposta é um array vazio (`[]`); falhas de consulta retornam erro, sem simular uma lista vazia. Os resultados mantêm a ordenação por nome e ID. A busca trata os caracteres % e _ literalmente e não remove acentos. Na interface, use URLSearchParams para montar a URL com os filtros.
 
 A seleção para vendas deverá guardar o id_produto do resultado, evitando confundir produtos com nomes semelhantes.
+
+## Entradas de estoque
+
+O módulo usa a tabela existente `controle_estoque` e atende ao registro de compras do RF05. Administradores e funcionários podem cadastrar e consultar entradas, enviando `Authorization: Bearer TOKEN`.
+
+| Método | Rota | Operação |
+| --- | --- | --- |
+| POST | /estoque | Registrar uma compra e somar a quantidade ao produto |
+| GET | /estoque | Listar entradas, da data de compra mais recente para a mais antiga |
+| GET | /estoque?id_produto=1 | Consultar as entradas de um produto |
+| GET | /estoque/:id | Consultar uma entrada pelo identificador |
+
+Exemplo de corpo JSON para `POST /estoque` (substitua o ID pelo de um produto cadastrado):
+
+```json
+{
+  "id_produto": 1,
+  "data_compra": "2026-11-14",
+  "quantidade_adquirida": 24,
+  "valor_total": "120.00"
+}
+```
+
+Os quatro campos são obrigatórios. Quantidade deve ser um número inteiro positivo; a data deve existir e seguir AAAA-MM-DD. O valor total é o custo da compra, aceita zero conforme o banco e deve ter até dez dígitos inteiros e duas casas decimais, com ponto como separador. O ID da entrada é gerado pelo banco.
+
+Na futura tela, o tipo e o nome exato serão selecionados pelos resultados de `GET /produtos?tipo=...&nome=...`. A entrada envia o `id_produto` selecionado; o banco já relaciona esse ID ao tipo e ao nome, sem duplicar esses campos em `controle_estoque`.
+
+- Uma entrada de 24 unidades em um produto com saldo 10 resulta em saldo 34.
+- A compra e o aumento do saldo são gravados na mesma transação: uma falha desfaz ambas as alterações. O produto fica bloqueado para alterações concorrentes durante essa operação.
+- Produtos do tipo `ficha_sinuca` não aceitam entradas de estoque. Suas quantidades vendidas serão registradas no módulo de vendas.
+- O custo da compra não altera `valor_unitario`, que continua sendo o preço de venda do produto, nem cria uma despesa duplicada.
+- As respostas incluem a entrada e o objeto `produto`, com ID, nome, tipo e saldo atual. Esse saldo é o da consulta, não o saldo histórico da data da compra.
+- Consultas sem resultados retornam `[]`. O único filtro aceito é `id_produto`; filtros desconhecidos, vazios ou repetidos são recusados.
+
+Respostas: 201 no cadastro; 200 nas consultas; 400 para dados inválidos ou tentativa de entrada de ficha; 404 para produto/entrada inexistente; 409 se o saldo ultrapassar o limite inteiro do banco. Falta de autenticação retorna 401. Falhas internas não expõem detalhes do banco.
+
+Nesta etapa há cadastro e consulta de entradas. Edição, exclusão e baixa pelas vendas ficam para etapas posteriores. Nenhuma alteração de tabela ou novo script SQL é necessária. Os testes automatizados continuam adiados conforme combinado.
 
 ## Usuarios e funcionarios
 
