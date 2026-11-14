@@ -25,6 +25,7 @@ app.use("/usuarios", require("./src/usuarios/usuarios.routes"));
 app.use("/estoque", require("./src/estoque/estoque.routes"));
 app.use("/vendas", require("./src/vendas/vendas.routes"));
 app.use("/reservas", require("./src/reservas/reservas.routes"));
+app.use("/despesas", require("./src/despesas/despesas.routes"));
 // Mantem erros de requisicao em JSON, sem expor detalhes internos.
 app.use((erro, req, res, next) => {
     if (res.headersSent) return next(erro);

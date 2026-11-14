@@ -45,7 +45,7 @@ Os arquivos .gitkeep mantêm as pastas vazias no Git.
 
 O servidor verifica a conexão antes de iniciar e escuta apenas no computador local. A rota /health retorna 503 se o banco ficar indisponível. Não usamos sync: as tabelas existentes são preservadas.
 
-`index.js` configura a aplicação, registra as rotas e inicia o servidor; `src/database/connection.js` configura o Sequelize. Autenticação, permissões, entradas de estoque, vendas e reservas estão implementados. Despesas e relatórios serão desenvolvidos nas próximas etapas.
+`index.js` configura a aplicação, registra as rotas e inicia o servidor; `src/database/connection.js` configura o Sequelize. Autenticação, permissões, entradas de estoque, vendas, reservas e cadastro/consulta de despesas estão implementados. Relatórios e dashboard serão desenvolvidos nas próximas etapas.
 
 ## Cadastro de mesas
 
@@ -153,6 +153,14 @@ O módulo usa `reserva_mesa` e `reserva_mesa_item`. Administradores e funcionár
 As rotas são `POST /reservas`, `GET /reservas`, `GET /reservas/:id`, `PATCH /reservas/:id` e `DELETE /reservas/:id`. A rota `GET /reservas/disponibilidade?inicio=...&fim=...` informa a disponibilidade na agenda e o estado atual de cada mesa separadamente.
 
 Consulte [o guia de reservas](docs/reservas.md) para exemplos, horários com fuso, filtros e cancelamento. O cancelamento exclui a reserva e seus vínculos, pois o modelo atual não possui status de reserva. Não é necessário executar novo SQL.
+
+## Registro de despesas
+
+O módulo usa a tabela existente `despesa` e permite ao administrador registrar e consultar custos operacionais pelo `POST /despesas`, `GET /despesas` e `GET /despesas/:id`. Funcionários não têm acesso a essas rotas.
+
+O cadastro exige tipo (`manutencao`, `energia`, `agua`, `limpeza` ou `outros`), valor positivo e data do pagamento. O responsável é definido automaticamente pelo usuário autenticado. Compras de produtos continuam em `controle_estoque`, sem gerar despesas automaticamente.
+
+Consulte [o guia de despesas](docs/despesas.md) para o exemplo de cadastro, validações e respostas. A etapa inclui cadastro e consulta; edição, exclusão e relatórios não estão incluídos. Não é necessário executar novo SQL.
 
 ## Usuarios e funcionarios
 
