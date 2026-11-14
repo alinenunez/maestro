@@ -19,7 +19,7 @@ O arquivo `database/scripts/02_consultas_sistema_maestro.sql` contém consultas 
 
 A estrutura inclui nove tabelas. Situação do usuário: TRUE para ativo e FALSE para inativo. Status da mesa: ocupada, disponivel ou manutencao. Uma reserva pode incluir várias mesas e possui duração em minutos.
 
-As entradas de estoque já atualizam o saldo automaticamente. Ainda serão implementados o bloqueio de reservas sobrepostas, os totais de vendas, a baixa de estoque pelas vendas e a validação de pelo menos um item por venda e uma mesa por reserva.
+As entradas e vendas já atualizam o saldo automaticamente. As vendas calculam o total e exigem pelo menos um item. Ainda serão implementados o bloqueio de reservas sobrepostas e a validação de pelo menos uma mesa por reserva.
 
 ## Configuração local
 
@@ -45,7 +45,7 @@ Os arquivos .gitkeep mantêm as pastas vazias no Git.
 
 O servidor verifica a conexão antes de iniciar e escuta apenas no computador local. A rota /health retorna 503 se o banco ficar indisponível. Não usamos sync: as tabelas existentes são preservadas.
 
-`index.js` configura a aplicação, registra as rotas e inicia o servidor; `src/database/connection.js` configura o Sequelize. Autenticação, permissões e entradas de estoque estão implementadas. Vendas, reservas, despesas e relatórios serão desenvolvidos nas próximas etapas.
+`index.js` configura a aplicação, registra as rotas e inicia o servidor; `src/database/connection.js` configura o Sequelize. Autenticação, permissões, entradas de estoque e registro/consulta de vendas estão implementados. Reservas, despesas e relatórios serão desenvolvidos nas próximas etapas.
 
 ## Cadastro de mesas
 
@@ -129,14 +129,22 @@ Na futura tela, o tipo e o nome exato serão selecionados pelos resultados de `G
 
 - Uma entrada de 24 unidades em um produto com saldo 10 resulta em saldo 34.
 - A compra e o aumento do saldo são gravados na mesma transação: uma falha desfaz ambas as alterações. O produto fica bloqueado para alterações concorrentes durante essa operação.
-- Produtos do tipo `ficha_sinuca` não aceitam entradas de estoque. Suas quantidades vendidas serão registradas no módulo de vendas.
+- Produtos do tipo `ficha_sinuca` não aceitam entradas de estoque. Suas quantidades vendidas são registradas no módulo de vendas, sem baixa de estoque.
 - O custo da compra não altera `valor_unitario`, que continua sendo o preço de venda do produto, nem cria uma despesa duplicada.
 - As respostas incluem a entrada e o objeto `produto`, com ID, nome, tipo e saldo atual. Esse saldo é o da consulta, não o saldo histórico da data da compra.
 - Consultas sem resultados retornam `[]`. O único filtro aceito é `id_produto`; filtros desconhecidos, vazios ou repetidos são recusados.
 
 Respostas: 201 no cadastro; 200 nas consultas; 400 para dados inválidos ou tentativa de entrada de ficha; 404 para produto/entrada inexistente; 409 se o saldo ultrapassar o limite inteiro do banco. Falta de autenticação retorna 401. Falhas internas não expõem detalhes do banco.
 
-Nesta etapa há cadastro e consulta de entradas. Edição, exclusão e baixa pelas vendas ficam para etapas posteriores. Nenhuma alteração de tabela ou novo script SQL é necessária. Os testes automatizados continuam adiados conforme combinado.
+O módulo de estoque permite cadastrar e consultar entradas. Edição e exclusão de entradas ficam para etapas posteriores. A baixa pelas vendas está implementada no módulo de vendas. Nenhuma alteração de tabela ou novo script SQL é necessária. Os testes automatizados continuam adiados conforme combinado.
+
+## Registro de vendas
+
+O módulo permite registrar vendas e consultar seu histórico, usando as tabelas existentes `venda` e `item_venda`. Administradores e funcionários acessam `POST /vendas`, `GET /vendas` e `GET /vendas/:id` com autenticação.
+
+O servidor calcula o total, preserva o preço de cada item, exige confirmação para bebidas alcoólicas e baixa o estoque dos produtos físicos. Venda, itens e baixas são gravados juntos. Fichas registram somente quantidade vendida e valor; reservas permanecem independentes.
+
+Consulte [o guia de vendas](docs/vendas.md) para os campos, exemplo de cadastro, respostas e limites desta etapa, incluindo a proteção contra reenvios ainda pendente.
 
 ## Usuarios e funcionarios
 
@@ -187,6 +195,6 @@ Consulte [o guia de autenticação](docs/autenticacao.md) para criar o primeiro 
 - `POST /auth/login`: email e senha; devolve JWT com validade de uma hora.
 - `GET /auth/me`: dados básicos do usuário autenticado.
 - Rotas de negócio: enviar `Authorization: Bearer TOKEN`.
-- `GET /usuarios/responsaveis`: ID e nome dos usuários ativos, disponível aos dois perfis para a futura seleção do responsável pela venda.
+- `GET /usuarios/responsaveis`: ID e nome dos usuários ativos, disponível aos dois perfis para selecionar o responsável pela venda.
 
 As chaves reais estão somente no `.env`, ignorado pelo Git. A estrutura do banco não foi alterada. Recuperação de senha e os próximos módulos permanecem pendentes.
