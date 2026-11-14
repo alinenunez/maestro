@@ -64,6 +64,19 @@ O detalhe da venda usa os preços históricos dos itens. O nome e o tipo do prod
 - `409`: estoque insuficiente, responsável inativo/perfil inválido ou cadastro de produto incompatível.
 - `500`: falha interna ao processar a venda; detalhes do banco não são expostos. Falhas na consulta da autenticação seguem retornando `503`.
 
-Esta etapa não inclui edição/cancelamento de vendas, relatórios nem a tela de montagem do pedido. A proteção contra reenvio da mesma venda (CT07-03) também está pendente: cada POST válido é uma nova venda, mesmo com corpo idêntico. Uma transação protege contra gravação parcial; ela não identifica requisições repetidas. Essa proteção precisará de um identificador persistente do pedido na próxima evolução.
+Esta etapa não inclui edição/cancelamento de vendas, relatórios nem a tela de montagem do pedido.
+
+### Decisão sobre envios repetidos
+
+Conforme decisão do projeto, o bloqueio será implementado somente no frontend, quando a tela de vendas for construída. A pasta `web` ainda não contém a aplicação React. Não será adicionado campo ou tabela para identificar pedidos repetidos.
+
+Na tela de vendas, será necessário:
+
+- Desabilitar o botão Finalizar enquanto o envio estiver em andamento, exibindo o estado de processamento.
+- Impedir um segundo envio no próprio tratamento da ação, inclusive acionamentos pelo teclado.
+- Limpar o pedido após a confirmação de sucesso.
+- Não reenviar automaticamente uma venda quando houver falha de conexão com resultado incerto; permitir conferir o histórico antes de uma nova tentativa.
+
+Essa decisão cobre cliques repetidos durante o processamento na mesma tela. O cenário CT07-03 de repetição direta da solicitação continua sem garantia no backend: cada POST válido cria uma venda, mesmo com corpo idêntico. A transação continua protegendo contra gravações parciais.
 
 Os testes automatizados foram adiados conforme combinado. A conferência desta entrega se limita à sintaxe, carregamento da aplicação e compatibilidade dos modelos/consultas com o banco em acesso somente de leitura; não certifica os cenários funcionais de gravação, falha ou concorrência.

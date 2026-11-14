@@ -19,7 +19,7 @@ O arquivo `database/scripts/02_consultas_sistema_maestro.sql` contém consultas 
 
 A estrutura inclui nove tabelas. Situação do usuário: TRUE para ativo e FALSE para inativo. Status da mesa: ocupada, disponivel ou manutencao. Uma reserva pode incluir várias mesas e possui duração em minutos.
 
-As entradas e vendas já atualizam o saldo automaticamente. As vendas calculam o total e exigem pelo menos um item. Ainda serão implementados o bloqueio de reservas sobrepostas e a validação de pelo menos uma mesa por reserva.
+As entradas e vendas já atualizam o saldo automaticamente. As vendas calculam o total e exigem pelo menos um item. As reservas exigem pelo menos uma mesa e verificam conflitos de horário e manutenção pela API.
 
 ## Configuração local
 
@@ -45,7 +45,7 @@ Os arquivos .gitkeep mantêm as pastas vazias no Git.
 
 O servidor verifica a conexão antes de iniciar e escuta apenas no computador local. A rota /health retorna 503 se o banco ficar indisponível. Não usamos sync: as tabelas existentes são preservadas.
 
-`index.js` configura a aplicação, registra as rotas e inicia o servidor; `src/database/connection.js` configura o Sequelize. Autenticação, permissões, entradas de estoque e registro/consulta de vendas estão implementados. Reservas, despesas e relatórios serão desenvolvidos nas próximas etapas.
+`index.js` configura a aplicação, registra as rotas e inicia o servidor; `src/database/connection.js` configura o Sequelize. Autenticação, permissões, entradas de estoque, vendas e reservas estão implementados. Despesas e relatórios serão desenvolvidos nas próximas etapas.
 
 ## Cadastro de mesas
 
@@ -67,7 +67,7 @@ Exemplo de corpo JSON para POST /mesas:
 
 O status é opcional no cadastro e assume disponivel. Os valores aceitos são ocupada, disponivel e manutencao. O número deve ser inteiro positivo e único. O ID é gerado pelo banco e não deve ser enviado no corpo.
 
-Para mudar apenas o status, envie PATCH /mesas/1 com `{"status":"manutencao"}`. O status representa a condição atual; a agenda de reservas será implementada em outra etapa.
+Para mudar apenas o status, envie PATCH /mesas/1 com `{"status":"manutencao"}`. O status representa a condição atual; a agenda de reservas pode ser consultada em /reservas e /reservas/disponibilidade.
 
 Respostas: 201 para criação, 200 para consultas/atualização, 204 para exclusão, 400 para campos inválidos, 404 para mesa inexistente, 409 para número duplicado ou exclusão impedida por reservas. Erros internos não expõem detalhes do banco.
 
@@ -144,7 +144,15 @@ O módulo permite registrar vendas e consultar seu histórico, usando as tabelas
 
 O servidor calcula o total, preserva o preço de cada item, exige confirmação para bebidas alcoólicas e baixa o estoque dos produtos físicos. Venda, itens e baixas são gravados juntos. Fichas registram somente quantidade vendida e valor; reservas permanecem independentes.
 
-Consulte [o guia de vendas](docs/vendas.md) para os campos, exemplo de cadastro, respostas e limites desta etapa, incluindo a proteção contra reenvios ainda pendente.
+Consulte [o guia de vendas](docs/vendas.md) para os campos, exemplo de cadastro, respostas e limites desta etapa, incluindo a decisão de bloquear envios repetidos somente na futura interface.
+
+## Reservas de mesas
+
+O módulo usa `reserva_mesa` e `reserva_mesa_item`. Administradores e funcionários podem cadastrar, consultar, editar e cancelar reservas com uma ou várias mesas, sem gerar vendas. O cadastro e a edição bloqueiam sobreposição de horários e mesas em manutenção.
+
+As rotas são `POST /reservas`, `GET /reservas`, `GET /reservas/:id`, `PATCH /reservas/:id` e `DELETE /reservas/:id`. A rota `GET /reservas/disponibilidade?inicio=...&fim=...` informa a disponibilidade na agenda e o estado atual de cada mesa separadamente.
+
+Consulte [o guia de reservas](docs/reservas.md) para exemplos, horários com fuso, filtros e cancelamento. O cancelamento exclui a reserva e seus vínculos, pois o modelo atual não possui status de reserva. Não é necessário executar novo SQL.
 
 ## Usuarios e funcionarios
 
