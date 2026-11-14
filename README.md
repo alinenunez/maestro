@@ -25,13 +25,13 @@ Ainda serão implementados o bloqueio de reservas sobrepostas, os totais de vend
 
 Não versionar senhas, credenciais ou arquivos `.env`. O banco local e seus dados não são enviados ao GitHub ao versionar os scripts SQL.
 
-Tecnologias: Node.js, Express e Sequelize no servidor; PostgreSQL no banco; React com Vite na interface. Instalação e conexão serão realizadas nas próximas etapas.
+Tecnologias: Node.js, Express, Sequelize e Passport/JWT no servidor; PostgreSQL no banco; React com Vite na interface futura.
 
 ## Organização do servidor
 
 Cada módulo reunirá rotas, controller, service e repository, seguindo o projeto da aula. Os módulos são usuarios, produtos, vendas, despesas, estoque, mesas e reservas.
 
-A pasta src/auth será usada para autenticação, com as estratégias Passport e verificações de acesso em auth.config.js, src/database/models, para modelos Sequelize. A conexão ficará em src/database/connection.js e o ponto de entrada é index.js na raiz. 
+A pasta src/auth contém a autenticação, com as estratégias Passport e verificações de acesso em auth.config.js. src/database/models contém os modelos Sequelize; src/database/connection.js configura a conexão. O ponto de entrada é index.js na raiz.
 
 Os arquivos .gitkeep mantêm as pastas vazias no Git.
 
@@ -40,12 +40,12 @@ Os arquivos .gitkeep mantêm as pastas vazias no Git.
 1. Instale as dependências com `npm install`.
 2. Em outro computador, copie `.env.example` para `.env`. Nesta configuração local, o arquivo já foi criado.
 3. Preencha `DB_PASSWORD` no `.env` e confira host, porta, usuário e nome exato do banco no pgAdmin. Se a senha contiver #, coloque o valor entre aspas duplas.
-4. Execute `npm run dev` para reiniciar automaticamente após alterações, ou `npm start`.
+4. Confira JWT_SECRET no `.env`. A chave local já foi gerada; para outro computador, siga `docs/autenticacao.md`. Execute `npm run dev` ou `npm start`.
 5. Acesse http://localhost:3000/health. Com o banco conectado, a resposta será `{"status":"ok","banco":"conectado"}`.
 
 O servidor verifica a conexão antes de iniciar e escuta apenas no computador local. A rota /health retorna 503 se o banco ficar indisponível. Não usamos sync: as tabelas existentes são preservadas.
 
-`index.js` configura a aplicação, registra as rotas e inicia o servidor; `src/database/connection.js` configura o Sequelize. Autenticação e módulos funcionais serão implementados posteriormente.
+`index.js` configura a aplicação, registra as rotas e inicia o servidor; `src/database/connection.js` configura o Sequelize. Autenticação e permissões estão configuradas. Estoque, vendas, reservas, despesas e relatórios serão desenvolvidos nas próximas etapas.
 
 ## Cadastro de mesas
 
@@ -71,7 +71,7 @@ Para mudar apenas o status, envie PATCH /mesas/1 com `{"status":"manutencao"}`. 
 
 Respostas: 201 para criação, 200 para consultas/atualização, 204 para exclusão, 400 para campos inválidos, 404 para mesa inexistente, 409 para número duplicado ou exclusão impedida por reservas. Erros internos não expõem detalhes do banco.
 
-Execute `npm test` para os testes HTTP com o repository simulado, sem alterar o banco. Autenticação ainda não foi implementada; execute esta etapa apenas localmente.
+As rotas de mesas agora exigem JWT. Os testes automatizados antigos serão adaptados à autenticação em uma etapa posterior; não foram executados nesta implementação.
 
 ## Tipos de produtos
 
@@ -109,7 +109,7 @@ O modulo usa a tabela `usuario` existente, sem funcao/cargo, conforme a decisao 
 | --- | --- | --- |
 | GET | /usuarios | Listar usuarios por nome |
 | GET | /usuarios/:id | Consultar usuario |
-| POST | /usuarios | Cadastrar administrador ou funcionario |
+| POST | /usuarios | Cadastrar funcionario (exige administrador autenticado) |
 | PATCH | /usuarios/:id | Atualizar dados ou situacao |
 
 Exemplo de corpo para POST /usuarios (dados ficticios para preenchimento manual):
@@ -129,7 +129,7 @@ Exemplo de corpo para POST /usuarios (dados ficticios para preenchimento manual)
 }
 ```
 
-- `tipo_acesso`: administrador ou funcionario.
+- `tipo_acesso`: administrador ou funcionario. O primeiro administrador usa `/auth/cadastro-inicial`; `POST /usuarios` aceita apenas funcionario. O perfil não pode ser alterado pelo cadastro.
 - `tipo_contratacao`: temporario ou efetivo. Por enquanto, o banco exige esse campo e data_inicio inclusive para administradores; a estrutura nao foi alterada.
 - `situacao`: booleano; se omitido no cadastro, assume true. Para inativar, envie PATCH /usuarios/:id com `{"situacao":false}`. Para reativar, envie true. Nao ha exclusao fisica de usuarios.
 - CPF: aceita 11 digitos ou mascara 000.000.000-00; salva somente digitos. A validacao atual e de formato, conforme a restricao do banco, sem verificacao dos digitos verificadores.
@@ -138,6 +138,18 @@ Exemplo de corpo para POST /usuarios (dados ficticios para preenchimento manual)
 - Senha e confirmacao sao obrigatorias no cadastro; em atualizacoes, envie ambas somente quando desejar trocar a senha. Confirmacao nao e armazenada. Apenas o hash bcrypt e salvo; nem senha nem hash sao devolvidos pela API. Senhas acima de 72 bytes sao recusadas para evitar truncamento pelo bcrypt.
 - Campos desconhecidos, incluindo senha_hash enviado pelo cliente, sao recusados.
 
-Autenticacao, verificacao de perfil e recuperacao de senha ficam para a proxima etapa. As rotas atuais sao apenas a base local do cadastro: ainda nao restringem operacoes ao administrador. A inativacao registra a situacao; o bloqueio de login sera implementado com autenticacao. 
+Autenticação e permissões estão implementadas. Os dados completos dos usuários ficam restritos ao administrador. Usuários inativos não podem fazer login nem usar tokens previamente emitidos enquanto estiverem inativos. Recuperação de senha por email fica para outra etapa.
 
 Testes automatizados de usuarios ficaram pendentes conforme combinado. A sintaxe dos arquivos foi verificada.
+
+## Login e permissões
+
+Consulte [o guia de autenticação](docs/autenticacao.md) para criar o primeiro administrador, fazer login no Postman/Insomnia e revisar a matriz de permissões.
+
+- `POST /auth/cadastro-inicial`: primeiro administrador, com a chave local no cabeçalho X-Setup-Token; bloqueado depois que já existe administrador.
+- `POST /auth/login`: email e senha; devolve JWT com validade de uma hora.
+- `GET /auth/me`: dados básicos do usuário autenticado.
+- Rotas de negócio: enviar `Authorization: Bearer TOKEN`.
+- `GET /usuarios/responsaveis`: ID e nome dos usuários ativos, disponível aos dois perfis para a futura seleção do responsável pela venda.
+
+As chaves reais estão somente no `.env`, ignorado pelo Git. A estrutura do banco não foi alterada. Recuperação de senha e os próximos módulos permanecem pendentes.

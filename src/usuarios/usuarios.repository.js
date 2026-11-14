@@ -7,4 +7,9 @@ async function atualizar(id, dados) {
     if (!usuario) return null;
     return usuario.update(dados);
 }
-module.exports = { listar, buscarPorId, criar, atualizar };
+const listarResponsaveis = () => Usuario.findAll({
+    attributes: ["id_usuario", "nome_completo"],
+    where: { situacao: true, tipo_acesso: ["administrador", "funcionario"] },
+    order: [["nome_completo", "ASC"], ["id_usuario", "ASC"]],
+});
+module.exports = { listar, buscarPorId, criar, atualizar, listarResponsaveis };

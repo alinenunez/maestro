@@ -79,14 +79,28 @@ async function buscarPorId(id) {
     return dadosPublicos(usuario);
 }
 async function criar(dados) {
-    const usuario = await repository.criar(await preparar(dados));
-    return dadosPublicos(usuario);
+    const preparados = await preparar(dados);
+    if (preparados.tipo_acesso !== "funcionario") {
+        throw falha("Esta operacao cadastra funcionarios. O administrador utiliza o cadastro inicial.");
+    }
+    return dadosPublicos(await repository.criar(preparados));
 }
-async function atualizar(id, dados) {
+async function atualizar(id, dados, operador) {
     const codigo = validarId(id);
-    if (!await repository.buscarPorId(codigo)) throw falha("Usuario nao encontrado.", 404);
-    const usuario = await repository.atualizar(codigo, await preparar(dados, true));
+    const atual = await repository.buscarPorId(codigo);
+    if (!atual) throw falha("Usuario nao encontrado.", 404);
+    const preparados = await preparar(dados, true);
+    if (preparados.tipo_acesso && preparados.tipo_acesso !== atual.tipo_acesso) {
+        throw falha("O perfil de acesso nao pode ser alterado neste cadastro.");
+    }
+    if (operador?.id_usuario === codigo && preparados.situacao === false) {
+        throw falha("O administrador nao pode inativar o proprio acesso.", 409);
+    }
+    const usuario = await repository.atualizar(codigo, preparados);
     if (!usuario) throw falha("Usuario nao encontrado.", 404);
     return dadosPublicos(usuario);
 }
-module.exports = { listar, buscarPorId, criar, atualizar };
+async function listarResponsaveis() {
+    return (await repository.listarResponsaveis()).map(dadosPublicos);
+}
+module.exports = { listar, buscarPorId, criar, atualizar, listarResponsaveis, preparar, dadosPublicos };

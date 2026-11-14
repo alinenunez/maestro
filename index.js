@@ -1,8 +1,14 @@
 const connection = require("./src/database/connection");
 const express = require("express");
+const passport = require("passport");
+const authConfig = require("./src/auth/auth.config");
 
 const app = express();
 app.use(express.json());
+authConfig.configureLocalStrategy();
+authConfig.configureJwtStrategy();
+app.use(passport.initialize());
+app.use("/auth", require("./src/auth/auth.routes"));
 
 app.get("/health", async (req, res) => {
     try {
@@ -16,6 +22,13 @@ app.get("/health", async (req, res) => {
 app.use("/mesas", require("./src/mesas/mesas.routes"));
 app.use("/produtos", require("./src/produtos/produtos.routes"));
 app.use("/usuarios", require("./src/usuarios/usuarios.routes"));
+// Mantem erros de requisicao em JSON, sem expor detalhes internos.
+app.use((erro, req, res, next) => {
+    if (res.headersSent) return next(erro);
+    if (erro.type === "entity.parse.failed") return res.status(400).json({ erro: "Corpo JSON invalido." });
+    if (erro.type === "entity.too.large") return res.status(413).json({ erro: "Corpo da requisicao muito grande." });
+    return res.status(500).json({ erro: "Nao foi possivel concluir a requisicao." });
+});
 const port = Number(process.env.PORT || 3000);
 
 async function iniciar() {

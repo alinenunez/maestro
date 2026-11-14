@@ -19,6 +19,9 @@ async function criar(req, res) {
     } catch (erro) { responderErro(res, erro); }
 }
 async function atualizar(req, res) {
-    try { res.json(await service.atualizar(req.params.id, req.body)); } catch (erro) { responderErro(res, erro); }
+    try { res.json(await service.atualizar(req.params.id, req.body, req.user)); } catch (erro) { responderErro(res, erro); }
 }
-module.exports = { listar, buscarPorId, criar, atualizar };
+async function listarResponsaveis(req, res) {
+    try { res.json(await service.listarResponsaveis()); } catch (erro) { responderErro(res, erro); }
+}
+module.exports = { listar, buscarPorId, criar, atualizar, listarResponsaveis };
