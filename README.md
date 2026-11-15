@@ -45,7 +45,7 @@ Os arquivos .gitkeep mantêm as pastas vazias no Git.
 
 O servidor verifica a conexão antes de iniciar e escuta apenas no computador local. A rota /health retorna 503 se o banco ficar indisponível. Não usamos sync: as tabelas existentes são preservadas.
 
-`index.js` configura a aplicação, registra as rotas e inicia o servidor; `src/database/connection.js` configura o Sequelize. Autenticação, permissões, entradas de estoque, vendas, reservas, cadastro/consulta de despesas, resumo financeiro e backend do dashboard estão implementados. Detalhamentos dos relatórios e interface React serão desenvolvidos nas próximas etapas.
+`index.js` configura a aplicação, registra as rotas e inicia o servidor; `src/database/connection.js` configura o Sequelize. Autenticação, permissões, entradas de estoque, vendas, reservas, cadastro/consulta de despesas, resumo financeiro e backend do dashboard estão implementados. O detalhamento dos relatórios financeiros também está disponível. A interface React será desenvolvida nas próximas etapas.
 
 ## Cadastro de mesas
 
@@ -167,6 +167,8 @@ Consulte [o guia de despesas](docs/despesas.md) para o exemplo de cadastro, vali
 A rota `GET /relatorios/financeiro?inicio=2026-11-01&fim=2026-11-30` consulta receitas de vendas, compras de estoque, despesas operacionais, total de custos e resultado do período. O acesso é exclusivo do administrador autenticado.
 
 As datas inicial e final são inclusivas. Vendas usam o horário de São Paulo; compras e despesas usam suas datas registradas. As somas são independentes e os valores monetários são devolvidos como strings com duas casas decimais. O resultado é receitas menos compras e despesas, podendo ser negativo.
+
+A rota `GET /relatorios/financeiro/detalhado?inicio=2026-11-01&fim=2026-11-30` acrescenta as vendas, compras de estoque e despesas que compõem os totais, com acesso exclusivo do administrador.
 
 Consulte [o guia de relatórios](docs/relatorios.md) para os campos da resposta, origem dos valores e limites desta etapa. O resumo usa apenas consultas às tabelas existentes; não exige model próprio, tabela nova ou script SQL adicional.
 

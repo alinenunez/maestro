@@ -38,13 +38,7 @@ function emReais(centavos) {
     return `${sinal}${valor / 100n}.${String(valor % 100n).padStart(2, "0")}`;
 }
 
-async function financeiro(filtros = {}) {
-    const { inicio, fim } = validarPeriodo(filtros);
-    const totais = await repository.financeiro(inicio, fim, fusoHorario);
-    // Os totais podem exceder o limite de um registro individual; BigInt mantem os centavos exatos.
-    const receitas = emCentavos(totais.total_receitas);
-    const compras = emCentavos(totais.total_compras_estoque);
-    const despesas = emCentavos(totais.total_despesas_operacionais);
+function montarResumo(inicio, fim, receitas, compras, despesas) {
     const custos = compras + despesas;
     return {
         periodo: { inicio, fim, fuso_horario: fusoHorario },
@@ -56,4 +50,23 @@ async function financeiro(filtros = {}) {
     };
 }
 
-module.exports = { financeiro };
+async function financeiro(filtros = {}) {
+    const { inicio, fim } = validarPeriodo(filtros);
+    const totais = await repository.financeiro(inicio, fim, fusoHorario);
+    return montarResumo(inicio, fim, emCentavos(totais.total_receitas),
+        emCentavos(totais.total_compras_estoque), emCentavos(totais.total_despesas_operacionais));
+}
+
+async function financeiroDetalhado(filtros = {}) {
+    const { inicio, fim } = validarPeriodo(filtros);
+    const lancamentos = await repository.financeiroDetalhado(inicio, fim, fusoHorario);
+    // Os totais correspondem exatamente as listas retornadas, mesmo durante novos registros.
+    // BigInt evita arredondamentos de ponto flutuante e suporta totais grandes.
+    const somar = (lista, campo) => lista.reduce((total, item) => total + emCentavos(item[campo]), 0n);
+    const receitas = somar(lancamentos.vendas, "valor_total");
+    const compras = somar(lancamentos.compras_estoque, "valor_total");
+    const despesas = somar(lancamentos.despesas_operacionais, "valor");
+    return { ...montarResumo(inicio, fim, receitas, compras, despesas), ...lancamentos };
+}
+
+module.exports = { financeiro, financeiroDetalhado };

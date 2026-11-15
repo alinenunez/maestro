@@ -9,4 +9,13 @@ async function financeiro(req, res) {
     }
 }
 
-module.exports = { financeiro };
+async function financeiroDetalhado(req, res) {
+    try {
+        res.json(await service.financeiroDetalhado(req.query));
+    } catch (erro) {
+        if (erro.statusCode) return res.status(erro.statusCode).json({ erro: erro.message });
+        return res.status(500).json({ erro: "Nao foi possivel consultar o relatorio financeiro detalhado." });
+    }
+}
+
+module.exports = { financeiro, financeiroDetalhado };
