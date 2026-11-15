@@ -29,7 +29,7 @@ Tecnologias: Node.js, Express, Sequelize e Passport/JWT no servidor; PostgreSQL 
 
 ## Organização do servidor
 
-Cada módulo reunirá rotas, controller, service e repository, seguindo o projeto da aula. Os módulos são usuarios, produtos, vendas, despesas, estoque, mesas, reservas e relatorios.
+Cada módulo reunirá rotas, controller, service e repository, seguindo o projeto da aula. Os módulos são usuarios, produtos, vendas, despesas, estoque, mesas, reservas, relatorios e dashboard.
 
 A pasta src/auth contém a autenticação, com as estratégias Passport e verificações de acesso em auth.config.js. src/database/models contém os modelos Sequelize; src/database/connection.js configura a conexão. O ponto de entrada é index.js na raiz.
 
@@ -45,7 +45,7 @@ Os arquivos .gitkeep mantêm as pastas vazias no Git.
 
 O servidor verifica a conexão antes de iniciar e escuta apenas no computador local. A rota /health retorna 503 se o banco ficar indisponível. Não usamos sync: as tabelas existentes são preservadas.
 
-`index.js` configura a aplicação, registra as rotas e inicia o servidor; `src/database/connection.js` configura o Sequelize. Autenticação, permissões, entradas de estoque, vendas, reservas, cadastro/consulta de despesas e resumo financeiro estão implementados. Detalhamentos dos relatórios e dashboard serão desenvolvidos nas próximas etapas.
+`index.js` configura a aplicação, registra as rotas e inicia o servidor; `src/database/connection.js` configura o Sequelize. Autenticação, permissões, entradas de estoque, vendas, reservas, cadastro/consulta de despesas, resumo financeiro e backend do dashboard estão implementados. Detalhamentos dos relatórios e interface React serão desenvolvidos nas próximas etapas.
 
 ## Cadastro de mesas
 
@@ -169,6 +169,14 @@ A rota `GET /relatorios/financeiro?inicio=2026-11-01&fim=2026-11-30` consulta re
 As datas inicial e final são inclusivas. Vendas usam o horário de São Paulo; compras e despesas usam suas datas registradas. As somas são independentes e os valores monetários são devolvidos como strings com duas casas decimais. O resultado é receitas menos compras e despesas, podendo ser negativo.
 
 Consulte [o guia de relatórios](docs/relatorios.md) para os campos da resposta, origem dos valores e limites desta etapa. O resumo usa apenas consultas às tabelas existentes; não exige model próprio, tabela nova ou script SQL adicional.
+
+## Dashboard
+
+`GET /dashboard` fornece estoque de cervejas, situação atual das mesas, reservas vigentes, vendas da noite e progresso da meta baseada na noite anterior. Administradores e funcionários podem consultar com autenticação. A interface React ainda não foi construída.
+
+A noite vai das 19h às 5h do dia seguinte, no horário de São Paulo. Entre 5h e 19h, o painel mantém a última noite encerrada. A identificação de cervejas usa a lista de marcas em `src/dashboard/dashboard.config.js`, aceitando a marca no início do nome, sozinha ou seguida de espaço e detalhes, como Heineken 600ml. Os produtos e a tabela são preservados. Se a lista estiver vazia, esse indicador fica sem configuração e seu valor será null.
+
+Consulte [o guia do dashboard](docs/dashboard.md) para configurar os nomes, entender as contagens e os horários e consultar o exemplo de resposta. O módulo usa somente leitura e não exige novo SQL.
 
 ## Usuarios e funcionarios
 

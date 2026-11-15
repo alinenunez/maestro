@@ -67,6 +67,6 @@ Compras registradas em `controle_estoque` não devem ser cadastradas novamente c
 - `403`: usuário autenticado sem perfil de administrador.
 - `500`: falha no cálculo ou consulta, sem expor detalhes internos. A autenticação mantém `503` se não conseguir consultar o banco.
 
-Esta entrega inclui o resumo por período. Detalhamento dos lançamentos, agrupamentos, gráficos, exportações e dashboard ficam para etapas posteriores.
+Esta entrega inclui o resumo por período. Detalhamento dos lançamentos, agrupamentos, gráficos e exportações ficam para etapas posteriores. O backend do dashboard está disponível separadamente em /dashboard, com a noite operacional das 19h às 5h; consulte [o guia do dashboard](dashboard.md).
 
 Foram conferidos sintaxe, carregamento da aplicação e execução da consulta de leitura no PostgreSQL. Nenhum lançamento foi criado, alterado ou removido. Os testes automatizados continuam adiados; os cenários completos de valores, limites de datas e permissões ainda precisam de validação funcional.
