@@ -64,7 +64,7 @@ O detalhe da venda usa os preços históricos dos itens. O nome e o tipo do prod
 - `409`: estoque insuficiente, responsável inativo/perfil inválido ou cadastro de produto incompatível.
 - `500`: falha interna ao processar a venda; detalhes do banco não são expostos. Falhas na consulta da autenticação seguem retornando `503`.
 
-Esta etapa não inclui edição/cancelamento de vendas, relatórios nem a tela de montagem do pedido.
+O módulo de vendas não inclui edição/cancelamento nem a tela de montagem do pedido. O resumo financeiro por período está disponível em /relatorios/financeiro, documentado no [guia de relatórios](relatorios.md).
 
 ### Decisão sobre envios repetidos
 

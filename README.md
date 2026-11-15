@@ -29,7 +29,7 @@ Tecnologias: Node.js, Express, Sequelize e Passport/JWT no servidor; PostgreSQL 
 
 ## Organização do servidor
 
-Cada módulo reunirá rotas, controller, service e repository, seguindo o projeto da aula. Os módulos são usuarios, produtos, vendas, despesas, estoque, mesas e reservas.
+Cada módulo reunirá rotas, controller, service e repository, seguindo o projeto da aula. Os módulos são usuarios, produtos, vendas, despesas, estoque, mesas, reservas e relatorios.
 
 A pasta src/auth contém a autenticação, com as estratégias Passport e verificações de acesso em auth.config.js. src/database/models contém os modelos Sequelize; src/database/connection.js configura a conexão. O ponto de entrada é index.js na raiz.
 
@@ -45,7 +45,7 @@ Os arquivos .gitkeep mantêm as pastas vazias no Git.
 
 O servidor verifica a conexão antes de iniciar e escuta apenas no computador local. A rota /health retorna 503 se o banco ficar indisponível. Não usamos sync: as tabelas existentes são preservadas.
 
-`index.js` configura a aplicação, registra as rotas e inicia o servidor; `src/database/connection.js` configura o Sequelize. Autenticação, permissões, entradas de estoque, vendas, reservas e cadastro/consulta de despesas estão implementados. Relatórios e dashboard serão desenvolvidos nas próximas etapas.
+`index.js` configura a aplicação, registra as rotas e inicia o servidor; `src/database/connection.js` configura o Sequelize. Autenticação, permissões, entradas de estoque, vendas, reservas, cadastro/consulta de despesas e resumo financeiro estão implementados. Detalhamentos dos relatórios e dashboard serão desenvolvidos nas próximas etapas.
 
 ## Cadastro de mesas
 
@@ -160,7 +160,15 @@ O módulo usa a tabela existente `despesa` e permite ao administrador registrar 
 
 O cadastro exige tipo (`manutencao`, `energia`, `agua`, `limpeza` ou `outros`), valor positivo e data do pagamento. O responsável é definido automaticamente pelo usuário autenticado. Compras de produtos continuam em `controle_estoque`, sem gerar despesas automaticamente.
 
-Consulte [o guia de despesas](docs/despesas.md) para o exemplo de cadastro, validações e respostas. A etapa inclui cadastro e consulta; edição, exclusão e relatórios não estão incluídos. Não é necessário executar novo SQL.
+Consulte [o guia de despesas](docs/despesas.md) para o exemplo de cadastro, validações e respostas. O módulo inclui cadastro e consulta, sem edição ou exclusão. Seus valores alimentam o resumo financeiro em /relatorios/financeiro. Não é necessário executar novo SQL.
+
+## Resumo financeiro
+
+A rota `GET /relatorios/financeiro?inicio=2026-11-01&fim=2026-11-30` consulta receitas de vendas, compras de estoque, despesas operacionais, total de custos e resultado do período. O acesso é exclusivo do administrador autenticado.
+
+As datas inicial e final são inclusivas. Vendas usam o horário de São Paulo; compras e despesas usam suas datas registradas. As somas são independentes e os valores monetários são devolvidos como strings com duas casas decimais. O resultado é receitas menos compras e despesas, podendo ser negativo.
+
+Consulte [o guia de relatórios](docs/relatorios.md) para os campos da resposta, origem dos valores e limites desta etapa. O resumo usa apenas consultas às tabelas existentes; não exige model próprio, tabela nova ou script SQL adicional.
 
 ## Usuarios e funcionarios
 

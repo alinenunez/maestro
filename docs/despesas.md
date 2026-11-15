@@ -48,7 +48,7 @@ O cadastro retorna a despesa gravada, incluindo `id_despesa` e `id_usuario`. O o
 
 Use esse módulo para custos operacionais. Compras de produtos continuam em `controle_estoque`; o sistema não cria automaticamente uma despesa para cada compra. Não cadastre novamente aqui o custo de uma aquisição já registrada como entrada de estoque.
 
-O futuro relatório financeiro somará separadamente as despesas operacionais e os custos de aquisição de estoque. As vendas fornecerão as receitas. O relatório ainda não foi implementado nesta etapa.
+O resumo financeiro em /relatorios/financeiro soma separadamente as despesas operacionais e os custos de aquisição de estoque. As vendas fornecem as receitas. Consulte [o guia de relatórios](relatorios.md) para filtrar o período e interpretar os totais.
 
 ## Respostas e limites
 
