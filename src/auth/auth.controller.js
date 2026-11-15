@@ -20,4 +20,14 @@ async function cadastrarAdministradorInicial(req, res) {
         return res.location(`/usuarios/${usuario.id_usuario}`).status(201).json(usuario);
     } catch (erro) { return responderErro(res, erro); }
 }
-module.exports = { login, consultarSessao, cadastrarAdministradorInicial };
+function solicitarRecuperacao(req, res) {
+    res.set("Cache-Control", "no-store");
+    try { return res.status(202).json(service.solicitarRecuperacao(req.body)); }
+    catch (erro) { return responderErro(res, erro); }
+}
+async function redefinirSenha(req, res) {
+    res.set("Cache-Control", "no-store");
+    try { return res.json(await service.redefinirSenha(req.body)); }
+    catch (erro) { return responderErro(res, erro); }
+}
+module.exports = { login, consultarSessao, cadastrarAdministradorInicial, solicitarRecuperacao, redefinirSenha };

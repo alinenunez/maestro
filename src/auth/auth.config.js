@@ -1,4 +1,6 @@
 const passport = require("passport");
+const { rateLimit } = require("express-rate-limit");
+const { createHash } = require("node:crypto");
 const LocalStrategy = require("passport-local").Strategy;
 const { Strategy: JwtStrategy, ExtractJwt } = require("passport-jwt");
 const service = require("./auth.service");
@@ -43,7 +45,7 @@ function configureJwtStrategy() {
         try {
             if (typeof payload.sub !== "string" || !/^[1-9][0-9]*$/.test(payload.sub) || Number(payload.sub) > 2147483647 || !Number.isInteger(payload.exp)) return done(null, false);
             const usuario = await repository.buscarUsuarioAtivoPorId(Number(payload.sub));
-            return done(null, usuario ? service.usuarioDaSessao(usuario) : false);
+            return done(null, usuario && service.versaoSessaoValida(payload.versao_senha, usuario) ? service.usuarioDaSessao(usuario) : false);
         } catch (erro) { return done(erro); }
     }));
 }
@@ -86,4 +88,31 @@ function verificarAlteracaoMesa(req, res, next) {
     return next();
 }
 
-module.exports = { configureLocalStrategy, configureJwtStrategy, requireLocalAuth, requireJWTAuth, requirePermissao, verificarAlteracaoMesa };
+
+const limitarSolicitacaoRecuperacao = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 10,
+    standardHeaders: "draft-8",
+    legacyHeaders: false,
+    message: { erro: "Muitas solicitacoes de recuperacao. Aguarde antes de tentar novamente." },
+});
+
+const limitarRecuperacaoPorEmail = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    limit: 3,
+    standardHeaders: "draft-8",
+    legacyHeaders: false,
+    skip: req => typeof req.body?.email !== "string" || req.body.email.trim().length > 254,
+    keyGenerator: req => createHash("sha256").update(req.body.email.trim().toLowerCase()).digest("hex"),
+    message: { erro: "Muitas solicitacoes para este email. Aguarde antes de tentar novamente." },
+});
+
+const limitarRedefinicaoSenha = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 10,
+    standardHeaders: "draft-8",
+    legacyHeaders: false,
+    message: { erro: "Muitas tentativas de redefinicao. Aguarde antes de tentar novamente." },
+});
+
+module.exports = { configureLocalStrategy, configureJwtStrategy, requireLocalAuth, requireJWTAuth, requirePermissao, verificarAlteracaoMesa, limitarSolicitacaoRecuperacao, limitarRecuperacaoPorEmail, limitarRedefinicaoSenha };

@@ -215,7 +215,7 @@ Exemplo de corpo para POST /usuarios (dados ficticios para preenchimento manual)
 - Senha e confirmacao sao obrigatorias no cadastro; em atualizacoes, envie ambas somente quando desejar trocar a senha. Confirmacao nao e armazenada. Apenas o hash bcrypt e salvo; nem senha nem hash sao devolvidos pela API. Senhas acima de 72 bytes sao recusadas para evitar truncamento pelo bcrypt.
 - Campos desconhecidos, incluindo senha_hash enviado pelo cliente, sao recusados.
 
-Autenticação e permissões estão implementadas. Os dados completos dos usuários ficam restritos ao administrador. Usuários inativos não podem fazer login nem usar tokens previamente emitidos enquanto estiverem inativos. Recuperação de senha por email fica para outra etapa.
+Autenticação e permissões estão implementadas. Os dados completos dos usuários ficam restritos ao administrador. Usuários inativos não podem fazer login nem usar tokens previamente emitidos enquanto estiverem inativos. Recuperação de senha por email está implementada no backend; configure o Gmail conforme o guia abaixo.
 
 Testes automatizados de usuarios ficaram pendentes conforme combinado. A sintaxe dos arquivos foi verificada.
 
@@ -226,7 +226,11 @@ Consulte [o guia de autenticação](docs/autenticacao.md) para criar o primeiro 
 - `POST /auth/cadastro-inicial`: primeiro administrador, com a chave local no cabeçalho X-Setup-Token; bloqueado depois que já existe administrador.
 - `POST /auth/login`: email e senha; devolve JWT com validade de uma hora.
 - `GET /auth/me`: dados básicos do usuário autenticado.
+- `POST /auth/recuperar-senha`: solicita um link de recuperação por email.
+- `POST /auth/redefinir-senha`: troca a senha usando o token recebido no link.
 - Rotas de negócio: enviar `Authorization: Bearer TOKEN`.
 - `GET /usuarios/responsaveis`: ID e nome dos usuários ativos, disponível aos dois perfis para selecionar o responsável pela venda.
 
-As chaves reais estão somente no `.env`, ignorado pelo Git. A estrutura do banco não foi alterada. Recuperação de senha e os próximos módulos permanecem pendentes.
+As chaves reais estão somente no `.env`, ignorado pelo Git. A estrutura do banco não foi alterada.
+
+Consulte [o guia de recuperação de senha](docs/recuperacao-senha.md) para configurar o Gmail e integrar as futuras telas React. O link expira em 15 minutos e deixa de funcionar após a troca; a alteração da senha ou do email também invalida os JWTs de login anteriores. As credenciais SMTP devem ser preenchidas localmente antes de usar o envio.

@@ -11,7 +11,7 @@ O `.env` precisa de duas chaves diferentes:
 
 As duas foram geradas no `.env` local durante esta implementação. Seus valores não aparecem no `.env.example` e não devem ir para o Git. A senha do PostgreSQL foi preservada. Em outro computador, gere cada chave com `node -e "console.log(require('node:crypto').randomBytes(48).toString('base64url'))"` e preencha o `.env`. Reinicie o servidor após alterar esse arquivo.
 
-Inicie com `npm run dev`. O endpoint `/health` permanece público. As demais rotas de negócio exigem autenticação.
+Inicie com `npm run dev`. O endpoint `/health` permanece público. As rotas de negócio exigem autenticação. As rotas públicas `/auth/recuperar-senha` e `/auth/redefinir-senha` atendem à recuperação por email e possuem limites de tentativas. Configure os dados SMTP no `.env` conforme o [guia de recuperação](recuperacao-senha.md).
 
 ## Primeiro administrador
 
@@ -61,14 +61,16 @@ Nas chamadas protegidas, use o cabeçalho:
 Authorization: Bearer TOKEN_RECEBIDO_NO_LOGIN
 ```
 
-`GET /auth/me` devolve o usuário autenticado. O JWT possui validade de uma hora, assinatura HS256, emissor e destinatário verificados. Cada chamada consulta o usuário ativo no banco e considera o perfil atual; não confia em um perfil enviado pelo cliente.
+`GET /auth/me` devolve o usuário autenticado. O JWT possui validade de uma hora, assinatura HS256, emissor e destinatário verificados. Cada chamada consulta o usuário ativo no banco, confere a versão da credencial e considera o perfil atual; não confia em um perfil enviado pelo cliente. A versão é uma assinatura derivada da senha armazenada e do email, sem expor o hash bcrypt.
 
 - Credenciais incorretas ou usuário inativo: 401 no login.
 - Token ausente, inválido, expirado ou usuário desativado: 401 nas rotas protegidas.
 - Perfil sem permissão: 403.
 - Falha ao consultar o banco durante autenticação: 503.
 
-Nesta etapa não há refresh token, recuperação por email nem endpoint de logout. A futura interface encerrará o acesso local descartando o token. Tokens já emitidos expiram em até uma hora; a troca de senha, sozinha, não os revoga. Usuários inativos são recusados mesmo antes da expiração. Esse comportamento será revisto se adicionarmos revogação de sessões.
+Nesta etapa não há refresh token nem endpoint de logout. A futura interface encerrará o acesso local descartando o token. Tokens de login expiram em até uma hora e passam a ser recusados após a troca da senha ou do email, inclusive quando alterados pelo administrador. Usuários inativos são recusados enquanto estiverem inativos. Tokens emitidos antes da inclusão da versão da credencial exigem novo login.
+
+A recuperação por email usa um token separado, válido por 15 minutos. A alteração da senha invalida os links anteriores e não realiza login automático. Veja os campos e exemplos no [guia de recuperação de senha](recuperacao-senha.md).
 
 ## Permissões nas rotas já implementadas
 
