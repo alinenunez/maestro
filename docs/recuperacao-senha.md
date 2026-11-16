@@ -26,7 +26,7 @@ Senhas de app exigem verificação em duas etapas e podem não estar disponívei
 
 A porta 587 usa STARTTLS: `SMTP_SECURE=false` inicia a conexão sem TLS implícito, mas `requireTLS: true` exige a negociação de criptografia antes da autenticação. Não significa envio sem proteção. Referências: [configuração SMTP do Gmail](https://support.google.com/mail/answer/7104828) e [transporte SMTP do Nodemailer](https://nodemailer.com/smtp).
 
-`RESET_PASSWORD_URL` é o endereço da futura página React para definir a nova senha. O servidor aceita HTTPS ou HTTP apenas em localhost/127.0.0.1/IPv6 local. Não inclua parâmetros, fragmento ou credenciais nesse valor. O backend acrescenta `#token=...` ao link. Em produção, substitua pelo endereço HTTPS da aplicação. A página React ainda será implementada.
+`RESET_PASSWORD_URL` é o endereço da futura página React para definir a nova senha. O servidor aceita HTTPS ou HTTP apenas em localhost/127.0.0.1/IPv6 local. Não inclua parâmetros, fragmento ou credenciais nesse valor. O backend acrescenta `#token=...` ao link. Em produção, substitua pelo endereço HTTPS da aplicação. A página React está implementada em web; execute npm run dev:web na raiz do projeto.
 
 O `.env` continua ignorado pelo Git; `.env.example` contém somente configurações públicas e campos vazios para credenciais.
 
@@ -50,7 +50,7 @@ A consulta e o envio são agendados depois da resposta; somente contas ativas de
 
 ## Definir a nova senha
 
-A futura página lê `token` do fragmento da URL e envia `POST /auth/redefinir-senha`, sem JWT de login:
+A página lê `token` do fragmento da URL e envia `POST /auth/redefinir-senha`, sem JWT de login:
 
 ```json
 {
@@ -68,7 +68,7 @@ Resposta HTTP 200:
 
 A senha segue a validação atual do cadastro: não pode ser vazia, deve corresponder à confirmação e ter até 72 bytes em UTF-8. A API grava somente o hash bcrypt. Não faz login automaticamente e agenda um email de aviso após a alteração.
 
-Para integrar o React, use `new URLSearchParams(window.location.hash.slice(1)).get("token")`. Mantenha o token apenas na memória da página e remova o fragmento com `history.replaceState` após a leitura. Não o coloque em logs ou armazenamento persistente. O fragmento evita enviá-lo ao servidor da página; a requisição de redefinição o envia no corpo JSON. Ainda falta construir as telas de solicitação e nova senha.
+Para integrar o React, use `new URLSearchParams(window.location.hash.slice(1)).get("token")`. Mantenha o token apenas na memória da página e remova o fragmento com `history.replaceState` após a leitura. Não o coloque em logs ou armazenamento persistente. O fragmento evita enviá-lo ao servidor da página; a requisição de redefinição o envia no corpo JSON. As duas telas estão disponíveis; consulte frontend.md.
 
 ## Validade e sessões
 
@@ -96,4 +96,4 @@ O envio em segundo plano não possui fila persistente nem nova tentativa automá
 
 ## Conferência desta etapa
 
-A sintaxe e o fluxo local foram conferidos com conta e envio simulados, sem modificar usuários reais ou enviar mensagens. A suíte automatizada do projeto continua adiada conforme combinado. O envio real pelo Gmail depende de preencher as credenciais e verificar a chegada do email; o fluxo pela interface depende das telas React.
+A sintaxe e o fluxo local foram conferidos com conta e envio simulados, sem modificar usuários reais ou enviar mensagens. A suíte automatizada do projeto continua adiada conforme combinado. O envio real pelo Gmail depende de preencher as credenciais e verificar a chegada do email; a interface React já possui as telas de solicitação e redefinição.

@@ -6,7 +6,7 @@ Trabalho integrador de banco de dados, Engenharia de Software I e Desenvolviment
 
 - `database/scripts`: criação do banco e consultas auxiliares PostgreSQL.
 - `src`: servidor Node.js com Express, organizado por funcionalidades.
-- `web`: interface React com Vite, a configurar.
+- `web`: interface React com Vite; login, recuperação de senha e início da sessão implementados.
 - `docs`: documentação de requisitos e engenharia de software.
 
 ## Banco de dados
@@ -45,7 +45,7 @@ Os arquivos .gitkeep mantêm as pastas vazias no Git.
 
 O servidor verifica a conexão antes de iniciar e escuta apenas no computador local. A rota /health retorna 503 se o banco ficar indisponível. Não usamos sync: as tabelas existentes são preservadas.
 
-`index.js` configura a aplicação, registra as rotas e inicia o servidor; `src/database/connection.js` configura o Sequelize. Autenticação, permissões, entradas de estoque, vendas, reservas, cadastro/consulta de despesas, resumo financeiro e backend do dashboard estão implementados. O detalhamento dos relatórios financeiros também está disponível. A interface React será desenvolvida nas próximas etapas.
+`index.js` configura a aplicação, registra as rotas e inicia o servidor; `src/database/connection.js` configura o Sequelize. Autenticação, permissões, entradas de estoque, vendas, reservas, cadastro/consulta de despesas, resumo financeiro e backend do dashboard estão implementados. O detalhamento dos relatórios financeiros também está disponível. A base React e as telas de acesso estão implementadas. As telas dos módulos de negócio serão desenvolvidas nas próximas etapas.
 
 ## Cadastro de mesas
 
@@ -236,3 +236,13 @@ Consulte [o guia de autenticação](docs/autenticacao.md) para criar o primeiro 
 As chaves reais estão somente no `.env`, ignorado pelo Git. A estrutura do banco não foi alterada.
 
 Consulte [o guia de recuperação de senha](docs/recuperacao-senha.md) para configurar o Gmail e integrar as futuras telas React. O link expira em 15 minutos e deixa de funcionar após a troca; a alteração da senha ou do email também invalida os JWTs de login anteriores. As credenciais SMTP devem ser preenchidas localmente antes de usar o envio.
+
+## Frontend: acesso ao sistema
+
+Na raiz do projeto, instale as dependências da interface com `npm --prefix web install`.
+Mantenha dois terminais abertos: `npm run dev` para a API e `npm run dev:web` para o React.
+Abra http://localhost:5173. Entre com uma conta já cadastrada no banco.
+
+O frontend inclui login, solicitação de recuperação, nova senha pelo link do email e uma página inicial protegida com os dados básicos do usuário e saída. O dashboard e as telas de negócio continuam para as próximas etapas. Não são exibidos dados fictícios na aplicação.
+
+Consulte [o guia do frontend](docs/frontend.md) para estrutura, configuração e limites desta etapa. `npm run build:web` gera a interface em `web/dist`, ignorada pelo Git.

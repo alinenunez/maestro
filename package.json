@@ -7,7 +7,10 @@
   "scripts": {
     "start": "node index.js",
     "dev": "node --watch index.js",
-    "test": "node --test"
+    "test": "node --test",
+    "dev:web": "npm --prefix web run dev",
+    "build:web": "npm --prefix web run build",
+    "preview:web": "npm --prefix web run preview"
   },
   "engines": {
     "node": ">=22"
