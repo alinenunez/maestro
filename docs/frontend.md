@@ -16,7 +16,7 @@ Não copie o .env do servidor para web. Senha do banco, chave JWT e credenciais 
 
 - src/main.jsx: inicia React, navegação e contexto de autenticação.
 - src/App.jsx: rotas, proteção das páginas e títulos.
-- src/pages: Login, RecuperarSenha, RedefinirSenha e Inicio.
+- src/pages: Login, RecuperarSenha, RedefinirSenha e Dashboard.
 - src/components: apresentação compartilhada e campo de senha com botão mostrar/ocultar.
 - src/contexts/AuthContext.jsx: usuário, token em memória, expiração, login e saída.
 - src/services/api.js: chamadas fetch, erros, cancelamento e tempo limite de 15 segundos.
@@ -31,11 +31,11 @@ O visual segue o fundo escuro/azul, formulário claro e botão em degradê do pr
 | /login | POST /auth/login |
 | /recuperar-senha | POST /auth/recuperar-senha |
 | /redefinir-senha#token=... | POST /auth/redefinir-senha |
-| /inicio | GET /auth/me, exige login |
+| /dashboard (e /inicio por redirecionamento) | GET /dashboard, exige login |
 
-Após o login, a página inicial confirma o acesso e mostra nome e perfil reais. Ainda não é o dashboard. A API continua sendo responsável pelas permissões; proteger uma rota React não substitui a autorização do servidor.
+Após o login, o dashboard mostra nome e perfil reais e consulta os indicadores da API. O login agora abre /dashboard; /inicio redireciona para ele. A API continua sendo responsável pelas permissões; proteger uma rota React não substitui a autorização do servidor.
 
-O token de login fica apenas na memória. Recarregar a página ou fechar a aba exige novo login. A expiração automática encerra a sessão; uma resposta 401 em chamada autenticada também retorna ao login. A página inicial reconsulta /auth/me ao receber foco. A saída descarta a sessão local, sem endpoint de logout ou revogação individual no backend.
+O token de login fica apenas na memória. Recarregar a página ou fechar a aba exige novo login. A expiração automática encerra a sessão; uma resposta 401 em chamada autenticada também retorna ao login. O dashboard reconsulta /dashboard ao receber foco e a cada minuto; a API valida a sessão em cada consulta. A saída descarta a sessão local, sem endpoint de logout ou revogação individual no backend.
 
 Na redefinição, o token é lido do fragmento e removido do endereço; fica apenas na memória da página. Após recarregá-la, é preciso reabrir o link original do email. O frontend compara senha e confirmação; a API valida assinatura, validade e uso do link. Depois da troca, retorna ao login. Erros e respostas genéricas do backend são exibidos sem revelar a existência da conta na recuperação.
 
@@ -50,3 +50,5 @@ O cadastro inicial continua pelo procedimento de docs/autenticacao.md, com a cha
 Nenhum site foi publicado. Em uma futura implantação, será necessário servir o build, encaminhar /api ao backend, aplicar fallback das páginas para index.html e configurar HTTPS e o endereço real dos emails. Os servidores dev e preview do Vite são para uso local.
 
 Referências de implementação: [React Context](https://react.dev/learn/passing-data-deeply-with-context), [rotas React Router](https://reactrouter.com/start/declarative/routing) e [proxy do Vite](https://vite.dev/config/server-options#server-proxy).
+
+A tela Dashboard e as regras dos dois perfis estão descritas em docs/dashboard.md. As demais opções do menu ficam desabilitadas até a implementação das respectivas telas.

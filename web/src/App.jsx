@@ -4,7 +4,7 @@ import { useAuth } from "./contexts/AuthContext";
 import Login from "./pages/Login";
 import RecuperarSenha from "./pages/RecuperarSenha";
 import RedefinirSenha from "./pages/RedefinirSenha";
-import Inicio from "./pages/Inicio";
+import Dashboard from "./pages/Dashboard";
 
 function RotaProtegida() {
     const { usuario } = useAuth();
@@ -13,14 +13,17 @@ function RotaProtegida() {
 export default function App() {
     const { pathname } = useLocation();
     useEffect(() => {
-        const titulos = { "/login": "Entrar", "/recuperar-senha": "Recuperar senha", "/redefinir-senha": "Criar nova senha", "/inicio": "Início" };
+        const titulos = { "/login": "Entrar", "/recuperar-senha": "Recuperar senha", "/redefinir-senha": "Criar nova senha", "/dashboard": "Dashboard", "/inicio": "Dashboard" };
         document.title = `${titulos[pathname] || "Acesso"} | Maestro`;
     }, [pathname]);
     return <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/recuperar-senha" element={<RecuperarSenha />} />
         <Route path="/redefinir-senha" element={<RedefinirSenha />} />
-        <Route element={<RotaProtegida />}><Route path="/inicio" element={<Inicio />} /></Route>
+        <Route element={<RotaProtegida />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/inicio" element={<Navigate to="/dashboard" replace />} />
+        </Route>
         <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>;
 }

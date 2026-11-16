@@ -174,7 +174,7 @@ Consulte [o guia de relatórios](docs/relatorios.md) para os campos da resposta,
 
 ## Dashboard
 
-`GET /dashboard` fornece estoque de cervejas, situação atual das mesas, reservas vigentes, vendas da noite e progresso da meta baseada na noite anterior. Administradores e funcionários podem consultar com autenticação. A interface React ainda não foi construída.
+`GET /dashboard` fornece estoque de cervejas, situação atual das mesas, reservas vigentes, vendas da noite e progresso da meta baseada na noite anterior. Administradores e funcionários podem consultar com autenticação. A tela React está disponível em /dashboard, com atualização automática e manual.
 
 A noite vai das 19h às 5h do dia seguinte, no horário de São Paulo. Entre 5h e 19h, o painel mantém a última noite encerrada. A identificação de cervejas usa a lista de marcas em `src/dashboard/dashboard.config.js`, aceitando a marca no início do nome, sozinha ou seguida de espaço e detalhes, como Heineken 600ml. Os produtos e a tabela são preservados. Se a lista estiver vazia, esse indicador fica sem configuração e seu valor será null.
 
@@ -243,6 +243,8 @@ Na raiz do projeto, instale as dependências da interface com `npm --prefix web 
 Mantenha dois terminais abertos: `npm run dev` para a API e `npm run dev:web` para o React.
 Abra http://localhost:5173. Entre com uma conta já cadastrada no banco.
 
-O frontend inclui login, solicitação de recuperação, nova senha pelo link do email e uma página inicial protegida com os dados básicos do usuário e saída. O dashboard e as telas de negócio continuam para as próximas etapas. Não são exibidos dados fictícios na aplicação.
+O frontend inclui login, solicitação de recuperação, nova senha pelo link do email e um dashboard protegido com os indicadores do bar, os dados básicos do usuário e saída. O dashboard está implementado; as telas dos demais módulos continuam para as próximas etapas. Não são exibidos dados fictícios na aplicação.
 
 Consulte [o guia do frontend](docs/frontend.md) para estrutura, configuração e limites desta etapa. `npm run build:web` gera a interface em `web/dist`, ignorada pelo Git.
+
+O dashboard React reúne os indicadores e os blocos de últimas vendas e estoque baixo do protótipo. Veja [o guia do dashboard](docs/dashboard.md).

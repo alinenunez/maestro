@@ -1,7 +1,7 @@
 const { QueryTypes } = require("sequelize");
 const connection = require("../database/connection");
 
-async function consultar({ fusoHorario, inicioNoite, fimNoite, nomesCervejas }) {
+async function consultar({ fusoHorario, inicioNoite, fimNoite, nomesCervejas, limiteEstoqueBaixo }) {
     // Todos os indicadores usam o mesmo instante e o mesmo retrato dos dados confirmados.
     const [resumo] = await connection.query(`
         WITH referencia AS (
@@ -68,7 +68,29 @@ async function consultar({ fusoHorario, inicioNoite, fimNoite, nomesCervejas }) 
                (p.agora >= p.inicio_atual AND p.agora < p.fim_atual) AS noite_em_andamento,
                m.*, e.cervejas_disponiveis,
                a.quantidade_atual, CAST(a.total_atual AS TEXT) AS total_atual,
-               b.quantidade_anterior, CAST(b.total_anterior AS TEXT) AS total_anterior
+               b.quantidade_anterior, CAST(b.total_anterior AS TEXT) AS total_anterior,
+               (SELECT COALESCE(jsonb_agg(to_jsonb(itens) ORDER BY itens.data_hora_venda DESC, itens.id_venda DESC, itens.id_produto), '[]'::jsonb)
+                FROM (
+                    SELECT v.id_venda, v.data_hora_venda, iv.id_produto, pr.nome_produto,
+                           iv.quantidade, CAST(iv.quantidade * iv.valor_unitario AS TEXT) AS subtotal,
+                           u.nome_completo AS nome_responsavel
+                    FROM venda v
+                    JOIN item_venda iv ON iv.id_venda = v.id_venda
+                    JOIN produtos pr ON pr.id_produto = iv.id_produto
+                    JOIN usuario u ON u.id_usuario = v.id_usuario
+                    WHERE v.data_hora_venda >= p.inicio_atual
+                      AND v.data_hora_venda < p.fim_atual
+                      AND v.data_hora_venda <= p.agora
+                    ORDER BY v.data_hora_venda DESC, v.id_venda DESC, iv.id_produto
+                    LIMIT 5
+                ) itens) AS ultimas_vendas,
+               (SELECT COALESCE(jsonb_agg(jsonb_build_object(
+                    'id_produto', pr.id_produto, 'nome_produto', pr.nome_produto,
+                    'tipo_produto', pr.tipo_produto, 'quantidade_produto', pr.quantidade_produto
+                ) ORDER BY pr.quantidade_produto, pr.nome_produto, pr.id_produto), '[]'::jsonb)
+                FROM produtos pr
+                WHERE pr.tipo_produto <> 'ficha_sinuca'
+                  AND pr.quantidade_produto <= :limiteEstoqueBaixo) AS produtos_baixos
         FROM periodo p
         CROSS JOIN totais_mesas m
         CROSS JOIN estoque e
@@ -79,6 +101,7 @@ async function consultar({ fusoHorario, inicioNoite, fimNoite, nomesCervejas }) 
             fusoHorario,
             inicioNoite,
             fimNoite,
+            limiteEstoqueBaixo,
             nomesCervejas: nomesCervejas.length ? nomesCervejas : [null],
         },
         type: QueryTypes.SELECT,

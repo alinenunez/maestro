@@ -1,8 +1,8 @@
-# Dashboard: backend
+# Dashboard
 
 O módulo fornece os indicadores do RF10 por `GET /dashboard`. Administrador e funcionário ativos podem consultar, enviando `Authorization: Bearer TOKEN_RECEBIDO_NO_LOGIN`.
 
-Esta entrega contém somente o backend. Não cria tela React, registros, tabelas ou colunas. Não é necessário executar novo SQL.
+A tela React em /dashboard consulta esta API. Não foram criados registros, tabelas ou colunas. Não é necessário executar novo SQL.
 
 ## Consulta
 
@@ -12,7 +12,7 @@ GET /dashboard
 
 A rota mostra o momento atual e não aceita parâmetros de consulta. Cada chamada faz uma nova leitura do banco, reunindo os indicadores em uma única consulta para usar o mesmo instante e os mesmos dados confirmados. A resposta inclui `atualizado_em` e `fuso_horario` e solicita que o cliente não armazene a resposta em cache.
 
-A futura interface precisará consultar a rota novamente para atualizar os números. Nesta etapa não há conexão permanente ou atualização automática da tela.
+A interface consulta a API ao abrir, a cada minuto enquanto estiver visível e quando a aba receber foco. Também possui o botão Atualizar. Não há conexão permanente: os números refletem a última consulta.
 
 ## Identificação das cervejas pelo nome
 
@@ -65,7 +65,7 @@ Por exemplo, vendas anteriores de R$ 1.000,00 e vendas atuais de R$ 750,00 produ
 
 Se o total anterior for zero, `meta.disponivel` será false e valor, progresso e atingida serão null. Isso evita divisão por zero e evita indicar uma meta atingida sem uma referência positiva.
 
-Valores monetários e percentuais são strings com duas casas decimais. O cálculo usa centavos inteiros com BigInt. Contagens são números inteiros. O dashboard não revela despesas, custos, lucro, dados pessoais de clientes ou dados cadastrais de usuários; o resumo financeiro permanece exclusivo do administrador.
+Valores monetários e percentuais são strings com duas casas decimais. O cálculo usa centavos inteiros com BigInt. Contagens são números inteiros. O dashboard não revela despesas, custos, lucro, dados pessoais de clientes ou credenciais; mostra somente o nome do responsável nos itens vendidos; o resumo financeiro permanece exclusivo do administrador.
 
 ## Exemplo de estrutura
 
@@ -110,3 +110,21 @@ Exemplo ilustrativo, com lista de cervejas configurada e uma noite em andamento:
 - `500`: falha na consulta ou cálculo, sem expor detalhes do banco e sem simular totais zero. A autenticação mantém `503` se não conseguir consultar o banco.
 
 Conferências desta etapa: sintaxe, carregamento da aplicação e execução da consulta somente de leitura no PostgreSQL. Nenhum produto, venda ou reserva foi alterado. Os testes automatizados continuam adiados; os cenários completos de horários, contagens, meta e permissões ainda precisam de validação funcional.
+
+## Blocos do protótipo e interface React
+
+O login agora abre /dashboard. /inicio redireciona para essa tela. Administrador e funcionário veem os indicadores, seu nome/perfil e Sair. A navegação é adaptada por perfil: funcionários não recebem as opções de gerenciamento de funcionários, produtos, despesas e relatórios. As opções dos módulos ainda sem tela ficam desabilitadas; somente Dashboard navega nesta etapa. Isso não substitui a autorização da API.
+
+A tela inclui carregamento inicial, listas vazias, meta indisponível, nenhum cadastro de mesa e erros. Uma falha de atualização preserva os últimos dados, com aviso explícito de que estão desatualizados. Uma resposta 401 encerra a sessão. Requisições em andamento são canceladas ao sair da tela e atualizações não se sobrepõem.
+
+O percentual pode ultrapassar 100%; a barra visual para em 100%. Quando não há vendas na noite anterior, aparece Sem meta. Mesas reservadas, livres, ocupadas e em manutenção são mostradas separadamente; reservas não são somadas aos status, pois podem se sobrepor. As datas e horas são exibidas em America/Sao_Paulo.
+
+Novos campos da mesma resposta GET /dashboard:
+
+- `ultimas_vendas`: até cinco itens da noite selecionada, ordenados por horário e ID de venda decrescentes, depois ID de produto crescente. Cada item contém id_venda, data_hora_venda, id_produto, nome_produto, quantidade, subtotal e nome_responsavel. Uma venda com vários produtos pode ocupar mais de uma linha. O subtotal usa o preço histórico de item_venda, não o preço atual. As vendas de fichas também aparecem. Uma lista vazia retorna [].
+- `estoque.limite_baixo`: limite inclusivo configurado em src/dashboard/dashboard.config.js, definido em 10 unidades conforme a escolha do projeto.
+- `estoque.produtos_baixos`: todos os produtos físicos com saldo menor ou igual ao limite, incluindo saldo zero, excluindo ficha_sinuca. Contém id_produto, nome_produto, tipo_produto e quantidade_produto. Ordenação por quantidade, nome e ID. A lista usa rolagem quando necessário; saldo zero aparece como Esgotado. Sem alertas, retorna [].
+
+Os novos blocos vêm da mesma consulta dos indicadores e usam o mesmo instante. Nomes de produtos e responsáveis refletem o cadastro atual. O exemplo de JSON acima ilustra os indicadores; a resposta agora inclui também esses campos.
+
+Conferência da interface: build concluído, consulta ampliada executada somente em leitura no PostgreSQL e revisão no navegador com dados fictícios em servidor separado. Foram conferidos os dois perfis, layout móvel, ausência de meta/dados, meta acima de 100%, saída e falha de atualização com preservação dos últimos dados. Nenhuma conta ou lançamento foi criado. A suíte de testes continua adiada.

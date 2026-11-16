@@ -11,7 +11,7 @@ export default function Login() {
     const [senha, setSenha] = useState("");
     const [erro, setErro] = useState("");
     const [enviando, setEnviando] = useState(false);
-    if (usuario) return <Navigate to="/inicio" replace />;
+    if (usuario) return <Navigate to="/dashboard" replace />;
     async function enviar(evento) {
         evento.preventDefault();
         if (enviando) return;

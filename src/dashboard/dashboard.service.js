@@ -23,6 +23,9 @@ const instante = valor => new Date(valor).toISOString();
 
 async function consultar(filtros = {}) {
     if (Object.keys(filtros).length) throw falha("O dashboard mostra o momento atual e nao aceita filtros.");
+    if (!Number.isInteger(config.limiteEstoqueBaixo) || config.limiteEstoqueBaixo < 0) {
+        throw new Error("Limite de estoque baixo invalido.");
+    }
     const nomes = [...new Set(config.nomesCervejas.map(nome => nome.trim().toLowerCase()).filter(Boolean))];
     const resumo = await repository.consultar({ ...config, nomesCervejas: nomes });
     const atual = emCentavos(resumo.total_atual);
@@ -32,7 +35,10 @@ async function consultar(filtros = {}) {
     return {
         atualizado_em: instante(resumo.agora),
         fuso_horario: config.fusoHorario,
+        ultimas_vendas: resumo.ultimas_vendas,
         estoque: {
+            limite_baixo: config.limiteEstoqueBaixo,
+            produtos_baixos: resumo.produtos_baixos,
             lista_cervejas_configurada: nomes.length > 0,
             cervejas_disponiveis: nomes.length ? inteiro(resumo.cervejas_disponiveis) : null,
         },
