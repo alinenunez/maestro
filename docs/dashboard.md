@@ -128,3 +128,5 @@ Novos campos da mesma resposta GET /dashboard:
 Os novos blocos vêm da mesma consulta dos indicadores e usam o mesmo instante. Nomes de produtos e responsáveis refletem o cadastro atual. O exemplo de JSON acima ilustra os indicadores; a resposta agora inclui também esses campos.
 
 Conferência da interface: build concluído, consulta ampliada executada somente em leitura no PostgreSQL e revisão no navegador com dados fictícios em servidor separado. Foram conferidos os dois perfis, layout móvel, ausência de meta/dados, meta acima de 100%, saída e falha de atualização com preservação dos últimos dados. Nenhuma conta ou lançamento foi criado. A suíte de testes continua adiada.
+
+Atualização: Produtos já está habilitado no menu do administrador, com cadastro, edição, consulta e exclusão confirmada. Consulte produtos-web.md. O cabeçalho agora é compartilhado por Dashboard e Produtos.

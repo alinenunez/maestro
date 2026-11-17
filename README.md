@@ -248,3 +248,5 @@ O frontend inclui login, solicitação de recuperação, nova senha pelo link do
 Consulte [o guia do frontend](docs/frontend.md) para estrutura, configuração e limites desta etapa. `npm run build:web` gera a interface em `web/dist`, ignorada pelo Git.
 
 O dashboard React reúne os indicadores e os blocos de últimas vendas e estoque baixo do protótipo. Veja [o guia do dashboard](docs/dashboard.md).
+
+A tela de [produtos](docs/produtos-web.md) está disponível em /produtos com busca, filtro, cadastro, edição e exclusão confirmada.

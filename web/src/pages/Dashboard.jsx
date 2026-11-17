@@ -1,23 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { NavLink } from "react-router-dom";
-import { Marca } from "../components/AuthLayout";
+import CabecalhoPainel from "../components/CabecalhoPainel";
 import { useAuth } from "../contexts/AuthContext";
 import { dinheiro, numero, horario, dataNoite } from "../utils/formatacao";
 import "../dashboard.css";
 
 const tipos = { bebida_alcoolica: "Bebida alcoólica", bebida_nao_alcoolica: "Bebida não alcoólica", guloseima: "Guloseima" };
-const opcoes = [
-    { nome: "Funcionários", administrador: true }, { nome: "Produtos", administrador: true },
-    { nome: "Estoque" }, { nome: "Vendas" }, { nome: "Despesas", administrador: true },
-    { nome: "Relatórios", administrador: true }, { nome: "Reservas de mesas" },
-];
 
 export default function Dashboard() {
-    const { usuario, consultar, sair } = useAuth();
+    const { consultar } = useAuth();
     const [dados, setDados] = useState(null);
     const [erro, setErro] = useState("");
     const [carregando, setCarregando] = useState(true);
-    const [menuAberto, setMenuAberto] = useState(false);
     const requisicaoAtual = useRef(null);
     const carregar = useCallback(async () => {
         if (requisicaoAtual.current) return;
@@ -52,15 +45,7 @@ export default function Dashboard() {
     }, [carregar]);
     const fuso = dados?.fuso_horario || "America/Sao_Paulo";
     return <div className="dashboard-layout">
-        <header className="painel-header">
-            <Marca />
-            <button className="menu-alternar" aria-expanded={menuAberto} aria-controls="menu-painel" onClick={() => setMenuAberto(!menuAberto)}>Menu <span aria-hidden="true">☰</span></button>
-            <nav id="menu-painel" aria-label="Menu principal" className={menuAberto ? "menu-painel aberto" : "menu-painel"}>
-                <NavLink to="/dashboard" onClick={() => setMenuAberto(false)}>Dashboard</NavLink>
-                {opcoes.filter(opcao => !opcao.administrador || usuario.tipo_acesso === "administrador").map(opcao => <button key={opcao.nome} disabled title="Tela disponível em uma próxima etapa">{opcao.nome}</button>)}
-            </nav>
-            <div className="painel-usuario"><span>{usuario.nome_completo}<small>{usuario.tipo_acesso === "administrador" ? "Administrador" : "Funcionário"}</small></span><button onClick={() => sair()} aria-label="Sair do sistema">Sair <span aria-hidden="true">↗</span></button></div>
-        </header>
+        <CabecalhoPainel />
         <main className="painel-conteudo">
             <div className="painel-titulo"><div><p className="sobretitulo">VISÃO GERAL DO BAR</p><h1>Dashboard</h1><p>{dados ? `Noite de ${dataNoite(dados.vendas.data_noite)} · ${horario(dados.vendas.inicio, fuso)} às ${horario(dados.vendas.fim, fuso)} do dia seguinte` : "Vendas, reservas e estoque em um só lugar."}</p></div><button className="atualizar" onClick={carregar} disabled={carregando}>{carregando ? "Atualizando…" : "↻ Atualizar"}</button></div>
             {erro && <div className="mensagem erro" role="alert"><strong>Não foi possível atualizar o dashboard.</strong><p>{erro}</p>{dados && <p>Os números abaixo são da última consulta, às {horario(dados.atualizado_em, fuso)}. Use Atualizar para tentar novamente.</p>}</div>}

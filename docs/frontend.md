@@ -52,3 +52,5 @@ Nenhum site foi publicado. Em uma futura implantação, será necessário servir
 Referências de implementação: [React Context](https://react.dev/learn/passing-data-deeply-with-context), [rotas React Router](https://reactrouter.com/start/declarative/routing) e [proxy do Vite](https://vite.dev/config/server-options#server-proxy).
 
 A tela Dashboard e as regras dos dois perfis estão descritas em docs/dashboard.md. As demais opções do menu ficam desabilitadas até a implementação das respectivas telas.
+
+Atualização: Produtos já está habilitado no menu do administrador, com cadastro, edição, consulta e exclusão confirmada. Consulte produtos-web.md. O cabeçalho agora é compartilhado por Dashboard e Produtos.

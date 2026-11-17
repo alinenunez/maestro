@@ -94,3 +94,5 @@
     .lista-estoque { padding:0 17px 20px; }
     .painel-atualizacao { text-align:left; }
 }
+
+.menu-painel a:hover { color:white; background:#ffffff20; }

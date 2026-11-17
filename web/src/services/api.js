@@ -15,6 +15,7 @@ export async function requisicao(caminho, { metodo = "GET", dados, token, signal
         if (signal?.aborted) throw erro;
         throw new Error("Não foi possível conectar ao servidor. Tente novamente em instantes.");
     }
+    if (resposta.status === 204) return null;
     const conteudo = await resposta.json().catch(() => null);
     if (!resposta.ok) {
         throw Object.assign(new Error(conteudo?.erro || "Não foi possível concluir a solicitação. Tente novamente."), { status: resposta.status });

@@ -1,0 +1,30 @@
+.produtos-layout { display:grid; grid-template-columns:minmax(0,1.7fr) minmax(280px,1fr); gap:28px; margin-top:28px; align-items:start; }
+.produtos-layout.somente-consulta { grid-template-columns:1fr; }
+.busca-produtos { display:flex; align-items:end; gap:9px; }
+.campo-busca { flex:1; font-size:12px; font-weight:600; }
+.campo-busca input { margin-top:7px; }
+.filtros-tipo { display:flex; gap:7px; flex-wrap:wrap; margin:17px 0; }
+.filtros-tipo button { border:1px solid #d0d3e4; border-radius:20px; padding:7px 12px; background:white; color:#43486b; font-size:11px; }
+.filtros-tipo button[aria-pressed=true] { background:#28246d; color:white; border-color:#28246d; }
+.produto-editor { padding:28px; border-radius:14px; background:linear-gradient(120deg,#12112f,#3530a9); color:white; box-shadow:6px 7px 0 #d0d7ee; }
+.produto-editor h2 { font-size:34px; }
+.produto-editor fieldset { margin:0; border:0; padding:0; min-width:0; }
+.produto-editor select { width:100%; min-height:50px; padding:10px; border-radius:10px; border:1px solid #c3c6db; background:white; font:inherit; color:#171a40; }
+.produto-editor .campo label { font-size:12px; }
+.aviso-ficha { font-size:11px; color:#dbd9f1; margin-top:15px; line-height:1.7; }
+.cancelar-edicao { display:block; margin:20px auto 0; background:none; color:white; border:0; text-decoration:underline; }
+.acoes-produto { display:flex; gap:8px; }
+.acoes-produto button { border:0; background:#eeedf8; color:#37326c; padding:7px; border-radius:5px; font-size:11px; }
+.acoes-produto button:last-child { background:#fcebee; color:#97374d; }
+.confirmar-exclusao { width:min(450px,90vw); border:0; border-radius:14px; padding:28px; color:#24244a; box-shadow:0 15px 70px #0004; }
+.confirmar-exclusao::backdrop { background:#07071d99; }
+.confirmar-exclusao h2 { font-size:30px; margin-bottom:20px; }
+.confirmar-exclusao p { margin:12px 0; font-size:13px; overflow-wrap:anywhere; }
+.acoes-confirmacao { display:flex; justify-content:flex-end; gap:10px; margin-top:25px; }
+.acoes-confirmacao button { padding:10px 15px; border-radius:8px; border:1px solid #ddd; background:white; }
+.acoes-confirmacao .excluir-confirmado { background:#a3314a; color:white; border-color:#a3314a; }
+@media(max-width:900px) { .produtos-layout { grid-template-columns:1fr; } .produto-editor { max-width:600px; width:100%; } }
+@media(max-width:450px) { .busca-produtos { flex-wrap:wrap; } .campo-busca { flex-basis:100%; } }
+
+.produtos-layout > section { min-width:0; }
+.campo-busca { min-width:0; }
