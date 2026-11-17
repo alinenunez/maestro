@@ -4,7 +4,7 @@ A tela /produtos segue o protótipo: busca e tabela à esquerda, cadastro/ediç�
 
 Busca por nome e filtro por tipo usam GET /produtos?nome=...&tipo=..., combinados. Buscar aplica o nome; Limpar remove ambos os filtros. Carregamento, erro com nova tentativa e lista vazia são apresentados separadamente. Consultas anteriores são canceladas quando os filtros mudam.
 
-O cadastro usa POST; a edição busca o registro atualizado por ID e usa PATCH somente com os campos alterados. Nome/preço não reenviam um saldo antigo. O preço aceita vírgula ou ponto, sem separadores de milhar; a API recebe string decimal. Quantidades devem ser inteiros não negativos. A alteração manual do saldo não cria uma compra: compras deverão usar a tela de Estoque.
+O cadastro usa POST; a edição busca o registro atualizado por ID e usa PATCH somente com os campos alterados. Nome/preço não reenviam um saldo antigo. O preço aceita vírgula ou ponto, sem separadores de milhar; a API recebe string decimal. Quantidades devem ser inteiros não negativos. A alteração manual do saldo não cria uma compra: compras devem usar a tela de Estoque, já disponível no menu.
 
 Fichas não exibem campo de quantidade e aparecem como Não se aplica na tabela. A API grava zero automaticamente. Converter produto físico em ficha mostra aviso de que o saldo será zerado. Converter ficha em produto físico permite informar quantidade.
 

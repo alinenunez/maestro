@@ -3,12 +3,12 @@ import { NavLink } from "react-router-dom";
 import { Marca } from "./AuthLayout";
 import { useAuth } from "../contexts/AuthContext";
 const opcoes = [
-    { nome: "Funcionários", administrador: true }, { nome: "Produtos" },
-    { nome: "Estoque" }, { nome: "Vendas" }, { nome: "Despesas", administrador: true },
+    { nome: "Funcionários", administrador: true }, { nome: "Produtos", caminho: "/produtos" },
+    { nome: "Estoque", caminho: "/estoque" }, { nome: "Vendas" }, { nome: "Despesas", administrador: true },
     { nome: "Relatórios", administrador: true }, { nome: "Reservas de mesas" },
 ];
 function NavOpcao({ opcao, fechar }) {
-    return opcao.nome === "Produtos" ? <NavLink to="/produtos" onClick={fechar}>Produtos</NavLink> : <button disabled title="Tela disponível em uma próxima etapa">{opcao.nome}</button>;
+    return opcao.caminho ? <NavLink to={opcao.caminho} onClick={fechar}>{opcao.nome}</NavLink> : <button disabled title="Tela disponível em uma próxima etapa">{opcao.nome}</button>;
 }
 export default function CabecalhoPainel() {
     const { usuario, sair } = useAuth();

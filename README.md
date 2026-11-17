@@ -243,10 +243,12 @@ Na raiz do projeto, instale as dependências da interface com `npm --prefix web 
 Mantenha dois terminais abertos: `npm run dev` para a API e `npm run dev:web` para o React.
 Abra http://localhost:5173. Entre com uma conta já cadastrada no banco.
 
-O frontend inclui login, solicitação de recuperação, nova senha pelo link do email e um dashboard protegido com os indicadores do bar, os dados básicos do usuário e saída. O dashboard está implementado; as telas dos demais módulos continuam para as próximas etapas. Não são exibidos dados fictícios na aplicação.
+O frontend inclui login, solicitação de recuperação, nova senha pelo link do email e um dashboard protegido com os indicadores do bar, os dados básicos do usuário e saída. Dashboard, Produtos e Estoque estão implementados; as telas dos demais módulos continuam para as próximas etapas. Não são exibidos dados fictícios na aplicação.
 
 Consulte [o guia do frontend](docs/frontend.md) para estrutura, configuração e limites desta etapa. `npm run build:web` gera a interface em `web/dist`, ignorada pelo Git.
 
 O dashboard React reúne os indicadores e os blocos de últimas vendas e estoque baixo do protótipo. Veja [o guia do dashboard](docs/dashboard.md).
 
 A tela de [produtos](docs/produtos-web.md) está disponível em /produtos com busca, filtro, cadastro, edição e exclusão confirmada.
+
+A tela de [estoque](docs/estoque-web.md) está disponível em /estoque para registrar compras e consultar o histórico por produto, com atualização do saldo pela API.

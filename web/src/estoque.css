@@ -1,0 +1,23 @@
+.estoque-layout { display:grid; grid-template-columns:minmax(0,1.7fr) minmax(310px,1fr); gap:28px; margin-top:28px; align-items:start; }
+.estoque-layout > section { min-width:0; }
+.estoque-filtro { margin-bottom:20px; }
+.estoque-filtro label { display:block; margin-bottom:7px; font-size:12px; font-weight:600; }
+.estoque-layout select { width:100%; min-width:0; min-height:50px; padding:10px; border-radius:10px; border:1px solid #c3c6db; background:white; font:inherit; color:#171a40; }
+.estoque-layout select:focus-visible { outline:3px solid #bb8a19; outline-offset:2px; }
+.estoque-editor { padding:28px; border-radius:14px; background:linear-gradient(120deg,#12112f,#3530a9); color:white; box-shadow:6px 7px 0 #d0d7ee; }
+.estoque-editor h2 { font-size:34px; }
+.estoque-editor fieldset { margin:0; border:0; padding:0; min-width:0; }
+.estoque-editor .campo label { font-size:12px; }
+.estoque-editor input { min-width:0; }
+.estoque-editor .estoque-ajuda { color:#dbd9f1; font-size:11px; line-height:1.7; margin-top:12px; }
+.estoque-campos { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.estoque-campos > div { min-width:0; }
+.estoque-nota { font-size:11px; color:#72768a; margin-top:15px; line-height:1.7; }
+.estoque-data { white-space:nowrap; }
+.estoque-saldo { display:inline-flex; gap:6px; align-items:center; white-space:nowrap; }
+.estoque-saldo small { margin:0 !important; border-radius:15px; padding:4px 7px; }
+.estoque-saldo.baixo small { color:#9a3650; background:#fbe3e7; }
+.estoque-saldo.regular small { color:#23644b; background:#e0f0e9; }
+.estoque-layout .estado-vazio .atualizar { margin-top:15px; }
+@media(max-width:1000px) { .estoque-layout { grid-template-columns:1fr; } .estoque-editor { max-width:600px; width:100%; } }
+@media(max-width:450px) { .estoque-editor { padding:22px; } .estoque-campos { grid-template-columns:1fr; gap:0; } }

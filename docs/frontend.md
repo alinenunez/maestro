@@ -16,7 +16,7 @@ Não copie o .env do servidor para web. Senha do banco, chave JWT e credenciais 
 
 - src/main.jsx: inicia React, navegação e contexto de autenticação.
 - src/App.jsx: rotas, proteção das páginas e títulos.
-- src/pages: Login, RecuperarSenha, RedefinirSenha e Dashboard.
+- src/pages: Login, RecuperarSenha, RedefinirSenha, Dashboard, Produtos e Estoque.
 - src/components: apresentação compartilhada e campo de senha com botão mostrar/ocultar.
 - src/contexts/AuthContext.jsx: usuário, token em memória, expiração, login e saída.
 - src/services/api.js: chamadas fetch, erros, cancelamento e tempo limite de 15 segundos.
@@ -32,6 +32,8 @@ O visual segue o fundo escuro/azul, formulário claro e botão em degradê do pr
 | /recuperar-senha | POST /auth/recuperar-senha |
 | /redefinir-senha#token=... | POST /auth/redefinir-senha |
 | /dashboard (e /inicio por redirecionamento) | GET /dashboard, exige login |
+| /produtos | GET, POST, PATCH e DELETE /produtos (escrita somente para administrador) |
+| /estoque | GET /produtos, GET /estoque, POST /estoque (ambos os perfis) |
 
 Após o login, o dashboard mostra nome e perfil reais e consulta os indicadores da API. O login agora abre /dashboard; /inicio redireciona para ele. A API continua sendo responsável pelas permissões; proteger uma rota React não substitui a autorização do servidor.
 
@@ -53,4 +55,4 @@ Referências de implementação: [React Context](https://react.dev/learn/passing
 
 A tela Dashboard e as regras dos dois perfis estão descritas em docs/dashboard.md. As demais opções do menu ficam desabilitadas até a implementação das respectivas telas.
 
-Atualização: Produtos já está habilitado no menu do administrador, com cadastro, edição, consulta e exclusão confirmada. Consulte produtos-web.md. O cabeçalho agora é compartilhado por Dashboard e Produtos.
+Produtos está habilitado para os dois perfis: administrador cadastra, edita e exclui; funcionário consulta. Estoque permite registrar compras e consultar o histórico nos dois perfis. Consulte produtos-web.md e estoque-web.md. O cabeçalho é compartilhado por Dashboard, Produtos e Estoque.
