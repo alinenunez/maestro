@@ -1,0 +1,48 @@
+.reservas-layout { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(300px,1.1fr); gap:22px; margin-top:28px; align-items:start; }
+.reservas-layout > section { min-width:0; }
+.salao-mesas,.reserva-editor { padding:24px; color:white; border-radius:14px; background:linear-gradient(120deg,#12112f,#3530a9); box-shadow:5px 7px 0 #d0d7ee; }
+.reservas-layout h2 { font-size:30px; }
+.reserva-ajuda { color:#dcdaf3; font-size:11px; margin-top:14px; line-height:1.7; }
+.reservas-layout select { width:100%; min-width:0; min-height:43px; padding:9px; border:1px solid #c3c6db; border-radius:9px; background:white; color:#171a40; font:inherit; font-size:12px; }
+.reservas-layout select:focus-visible { outline:3px solid #bb8a19; outline-offset:2px; }
+.salao-grade { display:grid; grid-template-columns:1fr 1fr; gap:22px 14px; margin-top:22px; }
+.salao-mesa { min-width:0; }
+.salao-mesa label { display:block; font-size:10px; margin:9px 0 5px; }
+.salao-mesa .atualizar { width:100%; margin-top:7px; font-size:10px; padding:9px 5px; }
+.mesa-desenho { min-height:95px; border:5px solid #b17d3a; border-radius:14px; position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; background:#205b4b; color:white; }
+.mesa-desenho::before { content:""; position:absolute; width:8px; height:8px; border-radius:50%; background:#111226; top:-2px; left:-2px; box-shadow:0 77px #111226; }
+.mesa-desenho::after { content:""; position:absolute; width:8px; height:8px; border-radius:50%; background:#111226; top:-2px; right:-2px; box-shadow:0 77px #111226; }
+.mesa-desenho.ocupada { background:#943d38; }
+.mesa-desenho.manutencao { background:#555568; }
+.mesa-desenho strong { font-family:'Barlow Condensed',Impact,sans-serif; font-size:35px; line-height:1; }
+.mesa-desenho span { font-size:10px; }
+.reserva-editor fieldset { border:0; margin:0; padding:0; min-width:0; }
+.reserva-editor input { min-width:0; font-size:13px; }
+.reserva-editor .consultar-mesas { width:100%; margin-top:22px; white-space:normal; }
+.reserva-link { display:block; margin:18px auto 0; padding:4px; border:0; background:transparent; color:inherit; text-decoration:underline; font-size:12px; }
+.mesa-opcao { display:flex; align-items:flex-start; gap:10px; padding:12px; margin-top:10px; border:1px solid #ffffff44; border-radius:9px; cursor:pointer; background:#ffffff09; }
+.mesa-opcao input { width:18px; min-height:18px; height:18px; padding:0; margin:2px 0 0; flex-shrink:0; accent-color:#6861d6; }
+.mesa-opcao strong { display:block; font-size:12px; }
+.mesa-opcao small { display:block; font-size:10px; margin-top:4px; line-height:1.6; color:#e3e1f6; }
+.mesa-opcao.indisponivel { border-style:dashed; background:#ffffff04; }
+.agenda-filtro { padding:0 20px 20px; }
+.agenda-filtro label { font-size:12px; display:block; margin-bottom:7px; font-weight:600; }
+.agenda-filtro .atualizar { margin-top:10px; }
+.agenda-filtro p { font-size:11px; margin-top:10px; color:#777b92; }
+.lista-reservas { list-style:none; margin:0; padding:0 18px 20px; max-height:700px; overflow:auto; display:grid; gap:14px; }
+.lista-reservas li { padding:15px; border:1px solid #dcddec; border-left:4px solid #605ab3; border-radius:9px; background:#f8f8fc; overflow-wrap:anywhere; }
+.lista-reservas strong { display:block; font-size:13px; }
+.lista-reservas span { display:block; font-size:10px; color:#77798d; margin:5px 0 12px; }
+.lista-reservas p { font-size:11px; margin-top:5px; }
+.reserva-acoes { display:flex; gap:9px; flex-wrap:wrap; margin-top:15px; }
+.reserva-acoes button { border:0; background:#e9e7f6; color:#363268; border-radius:6px; padding:9px; font-size:11px; }
+.reserva-acoes button:last-child { background:#fbe5e9; color:#96364c; }
+.reserva-dialogo { border:0; border-radius:14px; padding:28px; width:min(450px,94vw); color:#24244a; }
+.reserva-dialogo::backdrop { background:#07071d99; }
+.reserva-dialogo h2 { font-size:32px; }
+.reserva-dialogo p { font-size:13px; margin-top:18px; overflow-wrap:anywhere; }
+.reserva-incerta { display:grid; gap:14px; margin-top:15px; font-size:12px; }
+.reserva-incerta a { color:white; }
+.reserva-incerta button { white-space:normal; }
+@media(max-width:1150px) { .reservas-layout { grid-template-columns:1fr 1fr; } .reserva-editor { grid-column:1 / -1; max-width:650px; width:100%; } }
+@media(max-width:700px) { .reservas-layout { grid-template-columns:1fr; } .reserva-editor { grid-column:auto; } .reservas-pagina .painel-titulo { flex-wrap:wrap; } .lista-reservas { max-height:500px; } }

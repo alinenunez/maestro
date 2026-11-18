@@ -87,3 +87,5 @@ Não foram acrescentadas regras de horário de funcionamento, duração máxima 
 - `500`: falha interna na operação, sem expor detalhes do banco. A autenticação mantém `503` quando não consegue consultar o banco.
 
 Conferências desta etapa: sintaxe, carregamento do módulo e consultas somente de leitura para verificar os modelos e relacionamentos. Os testes automatizados continuam adiados, conforme combinado. Os cenários de gravação, concorrência e rollback ainda precisam de validação funcional; nenhum dado real foi criado, alterado ou excluído nesta conferência.
+
+A interface React está disponível em /reservas; veja [o guia da tela](reservas-web.md).
