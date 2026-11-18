@@ -16,7 +16,7 @@ Não copie o .env do servidor para web. Senha do banco, chave JWT e credenciais 
 
 - src/main.jsx: inicia React, navegação e contexto de autenticação.
 - src/App.jsx: rotas, proteção das páginas e títulos.
-- src/pages: Login, RecuperarSenha, RedefinirSenha, Dashboard, Produtos, Estoque, Vendas e Reservas.
+- src/pages: Login, RecuperarSenha, RedefinirSenha, Dashboard, Produtos, Estoque, Vendas, Reservas e Despesas.
 - src/components: apresentação compartilhada e campo de senha com botão mostrar/ocultar.
 - src/contexts/AuthContext.jsx: usuário, token em memória, expiração, login e saída.
 - src/services/api.js: chamadas fetch, erros, cancelamento e tempo limite de 15 segundos.
@@ -59,3 +59,5 @@ A tela Dashboard e as regras dos dois perfis estão descritas em docs/dashboard.
 Produtos está habilitado para os dois perfis: administrador cadastra, edita e exclui; funcionário consulta. Estoque permite registrar compras e consultar o histórico nos dois perfis. Consulte produtos-web.md e estoque-web.md. Vendas permite montar pedidos, finalizar e consultar vendas nos dois perfis; consulte vendas-web.md. O cabeçalho é compartilhado por Dashboard, Produtos, Estoque e Vendas.
 
 Reservas também está habilitado no menu dos dois perfis, compartilhando o cabeçalho. Usa GET/POST/PATCH/DELETE /reservas, GET /reservas/disponibilidade, GET /mesas e PATCH /mesas/:id. Consulte reservas-web.md.
+
+Despesas está disponível em /despesas somente para administradores: GET/POST /despesas, histórico e total listado. Consulte despesas-web.md.

@@ -4,7 +4,7 @@ import { Marca } from "./AuthLayout";
 import { useAuth } from "../contexts/AuthContext";
 const opcoes = [
     { nome: "Funcionários", administrador: true }, { nome: "Produtos", caminho: "/produtos" },
-    { nome: "Estoque", caminho: "/estoque" }, { nome: "Vendas", caminho: "/vendas" }, { nome: "Despesas", administrador: true },
+    { nome: "Estoque", caminho: "/estoque" }, { nome: "Vendas", caminho: "/vendas" }, { nome: "Despesas", caminho: "/despesas", administrador: true },
     { nome: "Relatórios", administrador: true }, { nome: "Reservas de mesas", caminho: "/reservas" },
 ];
 function NavOpcao({ opcao, fechar }) {

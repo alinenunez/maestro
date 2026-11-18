@@ -63,3 +63,5 @@ O resumo financeiro em /relatorios/financeiro soma separadamente as despesas ope
 Esta etapa inclui cadastro e consulta. Não há rotas de edição ou exclusão de despesas.
 
 Os testes automatizados continuam adiados conforme combinado. A conferência se limita à sintaxe, carregamento e consultas somente de leitura para verificar a compatibilidade com as tabelas. Nenhuma despesa real foi criada; os cenários funcionais de cadastro e permissões ainda precisam de validação.
+
+A interface de cadastro e histórico está disponível; consulte [Despesas no frontend](despesas-web.md).
