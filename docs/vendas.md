@@ -64,13 +64,13 @@ O detalhe da venda usa os preços históricos dos itens. O nome e o tipo do prod
 - `409`: estoque insuficiente, responsável inativo/perfil inválido ou cadastro de produto incompatível.
 - `500`: falha interna ao processar a venda; detalhes do banco não são expostos. Falhas na consulta da autenticação seguem retornando `503`.
 
-O módulo de vendas não inclui edição/cancelamento nem a tela de montagem do pedido. O resumo financeiro por período está disponível em /relatorios/financeiro, documentado no [guia de relatórios](relatorios.md).
+O módulo de vendas não inclui edição/cancelamento. A tela de montagem do pedido e o histórico estão implementados em /vendas; consulte [o guia da interface](vendas-web.md). O resumo financeiro por período está disponível em /relatorios/financeiro, documentado no [guia de relatórios](relatorios.md).
 
 ### Decisão sobre envios repetidos
 
-Conforme decisão do projeto, o bloqueio será implementado somente no frontend, quando a tela de vendas for construída. A pasta `web` ainda não contém a aplicação React. Não será adicionado campo ou tabela para identificar pedidos repetidos.
+Conforme decisão do projeto, o bloqueio está implementado somente no frontend, na tela de vendas. Não foi adicionado campo ou tabela para identificar pedidos repetidos.
 
-Na tela de vendas, será necessário:
+A tela de vendas implementa:
 
 - Desabilitar o botão Finalizar enquanto o envio estiver em andamento, exibindo o estado de processamento.
 - Impedir um segundo envio no próprio tratamento da ação, inclusive acionamentos pelo teclado.

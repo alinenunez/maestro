@@ -7,6 +7,7 @@ import RedefinirSenha from "./pages/RedefinirSenha";
 import Dashboard from "./pages/Dashboard";
 import Produtos from "./pages/Produtos";
 import Estoque from "./pages/Estoque";
+import Vendas from "./pages/Vendas";
 
 function RotaProtegida() {
     const { usuario } = useAuth();
@@ -15,7 +16,7 @@ function RotaProtegida() {
 export default function App() {
     const { pathname } = useLocation();
     useEffect(() => {
-        const titulos = { "/login": "Entrar", "/recuperar-senha": "Recuperar senha", "/redefinir-senha": "Criar nova senha", "/produtos": "Produtos", "/estoque": "Estoque", "/dashboard": "Dashboard", "/inicio": "Dashboard" };
+        const titulos = { "/login": "Entrar", "/recuperar-senha": "Recuperar senha", "/redefinir-senha": "Criar nova senha", "/produtos": "Produtos", "/estoque": "Estoque", "/vendas": "Vendas", "/dashboard": "Dashboard", "/inicio": "Dashboard" };
         document.title = `${titulos[pathname] || "Acesso"} | Maestro`;
     }, [pathname]);
     return <Routes>
@@ -26,6 +27,7 @@ export default function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/produtos" element={<Produtos />} />
             <Route path="/estoque" element={<Estoque />} />
+            <Route path="/vendas" element={<Vendas />} />
             <Route path="/inicio" element={<Navigate to="/dashboard" replace />} />
         </Route>
         <Route path="*" element={<Navigate to="/login" replace />} />

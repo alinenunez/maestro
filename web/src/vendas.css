@@ -1,0 +1,52 @@
+.vendas-layout { display:grid; grid-template-columns:minmax(0,1.45fr) minmax(300px,1fr); gap:28px; margin-top:28px; align-items:start; }
+.vendas-layout > section { min-width:0; }
+.venda-editor { padding:28px; border-radius:14px; background:linear-gradient(120deg,#12112f,#3530a9); color:white; box-shadow:6px 7px 0 #d0d7ee; }
+.venda-editor h2 { font-size:34px; }
+.venda-editor fieldset { margin:0; padding:0; border:0; min-width:0; }
+.venda-editor select { width:100%; min-width:0; min-height:50px; padding:10px; border:1px solid #c3c6db; border-radius:10px; background:white; color:#171a40; font:inherit; }
+.venda-editor select:focus-visible { outline:3px solid #bb8a19; outline-offset:2px; }
+.venda-editor input { min-width:0; }
+.venda-editor input[readonly] { background:#e7e8f4; color:#383660; }
+.venda-ajuda { color:#dbd9f1; font-size:11px; line-height:1.7; margin-top:12px; }
+.venda-campos { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:0 16px; }
+.venda-campos > div { min-width:0; }
+.venda-maioridade { display:flex; gap:12px; align-items:flex-start; margin-top:24px; padding:14px; border:1px solid #ffffff40; background:#ffffff0d; border-radius:9px; font-size:12px; cursor:pointer; }
+.venda-maioridade input { width:19px; height:19px; min-height:19px; margin:1px 0 0; padding:0; flex-shrink:0; accent-color:#6861d6; }
+.venda-maioridade small { display:block; font-size:10px; color:#dbd9f1; margin-top:4px; }
+.venda-maioridade input:focus-visible { outline:3px solid #edcb86; outline-offset:3px; }
+.venda-editor .adicionar-item { background:linear-gradient(110deg,#196b80,#243caa); box-shadow:0 4px 0 #171a61; }
+.resumo-venda .bloco-titulo { padding-bottom:22px; }
+.pedido-itens { display:grid; gap:12px; margin:0; padding:0 23px; list-style:none; }
+.pedido-itens li { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:16px; border-radius:10px; background:linear-gradient(110deg,#151332,#35309a); color:white; }
+.pedido-itens li > div { min-width:0; }
+.pedido-itens strong { display:block; font-size:13px; overflow-wrap:anywhere; }
+.pedido-itens span { display:block; margin-top:5px; font-size:11px; color:#d3d1f1; }
+.pedido-itens b { display:block; font-size:14px; margin-top:8px; }
+.pedido-itens button { flex-shrink:0; width:32px; height:32px; padding:0; border:1px solid #fdc7be; border-radius:50%; background:#b83e38; color:white; font-size:22px; line-height:1; }
+.pedido-fechamento { padding:23px; }
+.pedido-total { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; font-size:12px; }
+.pedido-total strong { font-family:'Barlow Condensed',Impact,sans-serif; font-size:42px; color:#282475; overflow-wrap:anywhere; }
+.venda-nota { font-size:11px; line-height:1.7; color:#74778b; margin-top:14px; }
+.limpar-pedido { display:block; margin:20px auto 0; padding:4px; border:0; background:none; color:#514b86; font-size:12px; text-decoration:underline; }
+.venda-envio-incerto { display:grid; gap:12px; font-size:12px; margin-top:16px; }
+.venda-envio-incerto .atualizar { white-space:normal; }
+.historico-vendas { margin-top:36px; scroll-margin-top:20px; }
+.historico-vendas .estado-vazio .atualizar { margin-top:18px; }
+.historico-vendas > .tabela-container { max-height:460px; overflow:auto; }
+.venda-data { white-space:nowrap; }
+.ver-venda { border:0; background:#eeedf8; color:#37326c; padding:8px 12px; border-radius:6px; font-size:11px; white-space:nowrap; }
+.detalhe-venda { width:min(760px,94vw); max-height:90svh; padding:0; border:0; border-radius:14px; color:#24244a; box-shadow:0 15px 70px #0004; }
+.detalhe-venda::backdrop { background:#07071d99; }
+.detalhe-venda .bloco-titulo { flex-wrap:wrap; }
+.venda-dados { padding:0 23px 18px; font-size:12px; color:#686b85; overflow-wrap:anywhere; }
+.venda-dados p + p { margin-top:7px; }
+.venda-total-detalhe { display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; padding:0 23px; font-size:13px; }
+.venda-total-detalhe strong { color:#282475; font-size:21px; }
+.detalhe-venda > .venda-nota { padding:0 23px 23px; }
+@media(max-width:950px) { .vendas-layout { grid-template-columns:1fr; } }
+@media(max-width:550px) {
+    .venda-editor { padding:22px; }
+    .venda-campos { grid-template-columns:1fr; }
+    .historico-vendas > .bloco-titulo { flex-wrap:wrap; }
+    .pedido-total strong { font-size:36px; }
+}

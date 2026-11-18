@@ -144,7 +144,7 @@ O módulo permite registrar vendas e consultar seu histórico, usando as tabelas
 
 O servidor calcula o total, preserva o preço de cada item, exige confirmação para bebidas alcoólicas e baixa o estoque dos produtos físicos. Venda, itens e baixas são gravados juntos. Fichas registram somente quantidade vendida e valor; reservas permanecem independentes.
 
-Consulte [o guia de vendas](docs/vendas.md) para os campos, exemplo de cadastro, respostas e limites desta etapa, incluindo a decisão de bloquear envios repetidos somente na futura interface.
+Consulte [o guia de vendas](docs/vendas.md) para os campos, exemplo de cadastro, respostas e limites desta etapa, incluindo a decisão de bloquear envios repetidos somente na interface.
 
 ## Reservas de mesas
 
@@ -243,7 +243,7 @@ Na raiz do projeto, instale as dependências da interface com `npm --prefix web 
 Mantenha dois terminais abertos: `npm run dev` para a API e `npm run dev:web` para o React.
 Abra http://localhost:5173. Entre com uma conta já cadastrada no banco.
 
-O frontend inclui login, solicitação de recuperação, nova senha pelo link do email e um dashboard protegido com os indicadores do bar, os dados básicos do usuário e saída. Dashboard, Produtos e Estoque estão implementados; as telas dos demais módulos continuam para as próximas etapas. Não são exibidos dados fictícios na aplicação.
+O frontend inclui login, solicitação de recuperação, nova senha pelo link do email e um dashboard protegido com os indicadores do bar, os dados básicos do usuário e saída. Dashboard, Produtos, Estoque e Vendas estão implementados; as telas dos demais módulos continuam para as próximas etapas. Não são exibidos dados fictícios na aplicação.
 
 Consulte [o guia do frontend](docs/frontend.md) para estrutura, configuração e limites desta etapa. `npm run build:web` gera a interface em `web/dist`, ignorada pelo Git.
 
@@ -252,3 +252,5 @@ O dashboard React reúne os indicadores e os blocos de últimas vendas e estoque
 A tela de [produtos](docs/produtos-web.md) está disponível em /produtos com busca, filtro, cadastro, edição e exclusão confirmada.
 
 A tela de [estoque](docs/estoque-web.md) está disponível em /estoque para registrar compras e consultar o histórico por produto, com atualização do saldo pela API.
+
+A tela de [vendas](docs/vendas-web.md) está disponível em /vendas para montar pedidos, registrar vendas e consultar os itens e valores históricos.
