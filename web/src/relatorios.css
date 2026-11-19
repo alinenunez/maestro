@@ -1,0 +1,22 @@
+.relatorio-filtro { display:flex; align-items:end; flex-wrap:wrap; gap:18px; margin-top:24px; padding:22px; background:white; border:1px solid #dddfea; border-radius:13px; }
+.relatorio-filtro .campo { margin:0; flex:1; min-width:180px; }
+.relatorio-filtro .botao-primario { width:auto; margin:0; min-height:50px; padding:12px 25px; }
+.relatorio-nota { font-size:11px; line-height:1.7; color:#696d84; margin:16px 0; }
+.relatorio-indicadores { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); background:linear-gradient(110deg,#11102e,#30298e); color:white; border-radius:14px; overflow:hidden; }
+.relatorio-indicadores section { padding:26px; min-width:0; }
+.relatorio-indicadores h2 { font-family:Inter,Arial,sans-serif; font-size:13px; }
+.relatorio-indicadores strong { display:block; font-family:'Barlow Condensed',Impact,sans-serif; font-size:42px; margin:12px 0; overflow-wrap:anywhere; }
+.relatorio-indicadores p { color:#d8d7ec; font-size:11px; line-height:1.6; }
+.relatorio-indicadores .resultado-negativo { background:#722c51; }
+.relatorio-indicadores .resultado-positivo { background:#214d59; }
+.relatorio-resumo,.relatorio-tabela { margin-top:24px; }
+.relatorio-resumo dl { margin:0; padding:0 24px 24px; }
+.relatorio-resumo dl > div { display:flex; justify-content:space-between; gap:20px; padding:17px 0; border-bottom:1px solid #e5e7ef; font-size:13px; }
+.relatorio-resumo dd { margin:0; text-align:right; overflow-wrap:anywhere; min-width:0; }
+.relatorio-resultado { font-weight:600; color:#25205f; }
+.relatorio-tabela td { overflow-wrap:anywhere; }
+.relatorio-tabela .tabela-container { max-height:480px; }
+.relatorio-filtro + .mensagem { margin-top:16px; }
+@media(max-width:800px) { .relatorio-indicadores { grid-template-columns:1fr; } .relatorio-indicadores strong { font-size:36px; } }
+@media(max-width:450px) { .relatorio-filtro { padding:18px; } .relatorio-filtro .botao-primario { width:100%; } .relatorio-resumo dl > div { flex-direction:column; gap:8px; } .relatorio-resumo dd { text-align:left; } }
+.relatorio-tabela table { min-width:600px; }

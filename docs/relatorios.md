@@ -118,3 +118,13 @@ As três listas vêm de uma única consulta SQL. Os totais são calculados a par
 Vendas aparecem uma vez por venda; seus itens podem ser consultados em `GET /vendas/:id`. Fichas já participam das receitas; reservas não geram receitas. Usuários inativos continuam identificando seus lançamentos históricos. Nomes de usuários, nomes e tipos de produtos são os dados atuais do cadastro; datas, quantidades e valores são os registrados no lançamento. Não são expostos CPF, email ou credenciais.
 
 O endpoint retorna todos os lançamentos do período, sem paginação ou limite silencioso. Para a interface, prefira períodos delimitados; o resumo continua disponível quando só forem necessários os totais. A consulta não grava dados nem exige novo SQL de criação ou migração.
+
+## Interface React
+
+A tela `/relatorios` é exclusiva do administrador e usa somente `GET /relatorios/financeiro/detalhado`. O filtro inicial vai do primeiro dia do mês até hoje, no fuso de São Paulo. Datas inicial e final são inclusivas; o formulário valida datas existentes e ordem do período.
+
+O resumo mostra receita, custos, resultado (inclusive prejuízo) e DRE simplificado. As três tabelas mostram todos os lançamentos retornados, preservando a ordenação da API. Totais e detalhamento vêm da mesma resposta, sem consultas independentes. Valores são formatados sem arredondar com ponto flutuante, inclusive resultados entre -1 e zero.
+
+Alterar datas não muda o período exibido até clicar em Consultar período. A tela identifica o período efetivamente consultado. Novas consultas removem os dados anteriores durante o carregamento; falhas exibem erro com nova tentativa, nunca totais zero. A consulta é cancelada ao sair da página. Funcionários são redirecionados antes de carregar o conteúdo; a autorização da API permanece obrigatória.
+
+Esta etapa inclui consulta, resumo e tabelas responsivas. Gráficos semanais, impressão e exportação do protótipo ficam para uma etapa posterior. Não houve alteração no backend ou no banco.

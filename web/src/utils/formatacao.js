@@ -1,7 +1,9 @@
 // Formata a parte inteira com BigInt para nao arredondar totais monetarios grandes.
 export function dinheiro(valor) {
-    const [inteiros, centavos = "00"] = String(valor).split(".");
-    return `R$ ${BigInt(inteiros).toLocaleString("pt-BR")},${centavos.padEnd(2, "0")}`;
+    const texto = String(valor);
+    const negativo = texto.startsWith("-");
+    const [inteiros, centavos = "00"] = (negativo ? texto.slice(1) : texto).split(".");
+    return `${negativo ? "−" : ""}R$ ${BigInt(inteiros).toLocaleString("pt-BR")},${centavos.padEnd(2, "0")}`;
 }
 export function numero(valor) {
     return Number(valor).toLocaleString("pt-BR", { maximumFractionDigits: 2 });

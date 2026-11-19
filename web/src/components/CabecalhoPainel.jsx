@@ -5,7 +5,7 @@ import { useAuth } from "../contexts/AuthContext";
 const opcoes = [
     { nome: "Funcionários", administrador: true }, { nome: "Produtos", caminho: "/produtos" },
     { nome: "Estoque", caminho: "/estoque" }, { nome: "Vendas", caminho: "/vendas" }, { nome: "Despesas", caminho: "/despesas", administrador: true },
-    { nome: "Relatórios", administrador: true }, { nome: "Reservas de mesas", caminho: "/reservas" },
+    { nome: "Relatórios", caminho: "/relatorios", administrador: true }, { nome: "Reservas de mesas", caminho: "/reservas" },
 ];
 function NavOpcao({ opcao, fechar }) {
     return opcao.caminho ? <NavLink to={opcao.caminho} onClick={fechar}>{opcao.nome}</NavLink> : <button disabled title="Tela disponível em uma próxima etapa">{opcao.nome}</button>;
