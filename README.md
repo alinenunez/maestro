@@ -4,14 +4,14 @@ Trabalho integrador de banco de dados, Engenharia de Software I e Desenvolviment
 
 ## Organização
 
-- `database/scripts`: criação do banco e consultas auxiliares PostgreSQL.
+- `database/scripts`: criação das tabelas e consultas auxiliares PostgreSQL.
 - `src`: servidor Node.js com Express, organizado por funcionalidades.
-- `web`: interface React com Vite; login, recuperação de senha e início da sessão implementados.
-- `docs`: documentação de requisitos e engenharia de software.
+- `web`: interface React com Vite, telas de acesso e módulos de gestão do bar.
+- `docs`: guias de configuração, regras implementadas, rotas da API e funcionamento das telas.
 
 ## Banco de dados
 
-O banco utilizado é o PostgreSQL, com nome SistemaMaestro.
+O banco utilizado é o PostgreSQL, com nome `SistemaMaestro`. Para uma instalação nova, crie esse banco no pgAdmin antes de executar o script de tabelas; o script não cria o banco.
 
 Em um banco novo, execute `database/scripts/01_estrutura_sistema_maestro.sql` no Query Tool do pgAdmin. Se as tabelas já existem, não execute novamente: futuras alterações devem ser feitas por scripts de migração.
 
@@ -25,27 +25,25 @@ As entradas e vendas já atualizam o saldo automaticamente. As vendas calculam o
 
 Não versionar senhas, credenciais ou arquivos `.env`. O banco local e seus dados não são enviados ao GitHub ao versionar os scripts SQL.
 
-Tecnologias: Node.js, Express, Sequelize e Passport/JWT no servidor; PostgreSQL no banco; React com Vite na interface futura.
+Tecnologias: Node.js, Express, Sequelize e Passport/JWT no servidor; PostgreSQL no banco; React com Vite na interface. Use Node.js 22.12 ou superior, compatível com as dependências do projeto, npm e PostgreSQL em execução.
 
 ## Organização do servidor
 
-Cada módulo reunirá rotas, controller, service e repository, seguindo o projeto da aula. Os módulos são usuarios, produtos, vendas, despesas, estoque, mesas, reservas, relatorios e dashboard.
+Cada módulo reúne rotas, controller, service e repository, seguindo o projeto da aula. Os módulos são usuarios, produtos, vendas, despesas, estoque, mesas, reservas, relatorios e dashboard.
 
 A pasta src/auth contém a autenticação, com as estratégias Passport e verificações de acesso em auth.config.js. src/database/models contém os modelos Sequelize; src/database/connection.js configura a conexão. O ponto de entrada é index.js na raiz.
-
-Os arquivos .gitkeep mantêm as pastas vazias no Git.
 
 ## Executar o servidor
 
 1. Instale as dependências com `npm install`.
-2. Em outro computador, copie `.env.example` para `.env`. Nesta configuração local, o arquivo já foi criado.
+2. Na primeira instalação, copie `.env.example` para `.env`. Se o arquivo já estiver configurado, preserve-o.
 3. Preencha `DB_PASSWORD` no `.env` e confira host, porta, usuário e nome exato do banco no pgAdmin. Se a senha contiver #, coloque o valor entre aspas duplas.
-4. Confira JWT_SECRET no `.env`. A chave local já foi gerada; para outro computador, siga `docs/autenticacao.md`. Execute `npm run dev` ou `npm start`.
+4. Configure `JWT_SECRET` e, para cadastrar administradores, `ADMIN_SETUP_TOKEN`, conforme [autenticação](docs/autenticacao.md). Execute `npm run dev` ou `npm start`. Reinicie o servidor após alterar o `.env`.
 5. Acesse http://localhost:3000/health. Com o banco conectado, a resposta será `{"status":"ok","banco":"conectado"}`.
 
 O servidor verifica a conexão antes de iniciar e escuta apenas no computador local. A rota /health retorna 503 se o banco ficar indisponível. Não usamos sync: as tabelas existentes são preservadas.
 
-`index.js` configura a aplicação, registra as rotas e inicia o servidor; `src/database/connection.js` configura o Sequelize. Autenticação, permissões, entradas de estoque, vendas, reservas, cadastro, consulta, edição e exclusão de despesas, resumo financeiro e backend do dashboard estão implementados. O detalhamento dos relatórios financeiros também está disponível. A base React e as telas de acesso estão implementadas. As telas dos módulos de negócio serão desenvolvidas nas próximas etapas.
+`index.js` configura a aplicação, registra as rotas e inicia o servidor; `src/database/connection.js` configura o Sequelize. Autenticação, permissões, entradas de estoque, vendas, reservas, cadastro, consulta, edição e exclusão de despesas, resumo financeiro e backend do dashboard estão implementados. O detalhamento dos relatórios financeiros também está disponível. A interface React inclui as telas de acesso, Dashboard, Produtos, Estoque, Vendas, Reservas, Despesas, Relatórios e Funcionários. O gerenciamento de mesas fica dentro de Reservas.
 
 ## Cadastro de mesas
 
@@ -99,7 +97,15 @@ A rota `GET /produtos` aceita os parâmetros opcionais `nome` e `tipo`:
 
 Filtros vazios são ignorados. Tipos inválidos e parâmetros repetidos retornam HTTP 400. Sem resultados, a resposta é um array vazio (`[]`); falhas de consulta retornam erro, sem simular uma lista vazia. Os resultados mantêm a ordenação por nome e ID. A busca trata os caracteres % e _ literalmente e não remove acentos. Na interface, use URLSearchParams para montar a URL com os filtros.
 
-A seleção para vendas deverá guardar o id_produto do resultado, evitando confundir produtos com nomes semelhantes.
+A seleção nas telas de Vendas e Estoque guarda o `id_produto` do resultado e permite filtrar por tipo. A tela Produtos oferece busca por nome e filtro por tipo combinados.
+
+## Custos de compra e preços de venda
+
+- `produtos.valor_unitario`: custo unitário de compra cadastrado. A tela cadastra produtos com estoque zero; as entradas aumentam o saldo.
+- `controle_estoque.valor_total`: total da compra, calculado na tela Estoque pela quantidade e pelo custo cadastrado. Alterar o cadastro não recalcula compras anteriores.
+- `item_venda.valor_unitario`: preço cobrado do cliente, informado pelo operador na tela Vendas. O subtotal do item e o total do pedido são automáticos, e o backend recalcula o total antes de gravar.
+
+Exemplo: 10 unidades com custo de R$ 5,00 registram uma compra de R$ 50,00. Vender 3 dessas unidades a R$ 9,00 registra R$ 27,00 de receita. Os dois valores têm origens independentes.
 
 ## Entradas de estoque
 
@@ -125,12 +131,12 @@ Exemplo de corpo JSON para `POST /estoque` (substitua o ID pelo de um produto ca
 
 Os quatro campos são obrigatórios. Quantidade deve ser um número inteiro positivo; a data deve existir e seguir AAAA-MM-DD. O valor total é o custo da compra, aceita zero conforme o banco e deve ter até dez dígitos inteiros e duas casas decimais, com ponto como separador. O ID da entrada é gerado pelo banco.
 
-Na futura tela, o tipo e o nome exato serão selecionados pelos resultados de `GET /produtos?tipo=...&nome=...`. A entrada envia o `id_produto` selecionado; o banco já relaciona esse ID ao tipo e ao nome, sem duplicar esses campos em `controle_estoque`.
+Na tela Estoque, escolha o tipo e o produto a partir de `GET /produtos`. O total é calculado na interface multiplicando a quantidade pelo custo unitário cadastrado em Produtos; a API valida o total recebido, mas não o recalcula pelo cadastro. A entrada envia o `id_produto` selecionado; o banco já relaciona esse ID ao tipo e ao nome, sem duplicar esses campos em `controle_estoque`.
 
 - Uma entrada de 24 unidades em um produto com saldo 10 resulta em saldo 34.
 - A compra e o aumento do saldo são gravados na mesma transação: uma falha desfaz ambas as alterações. O produto fica bloqueado para alterações concorrentes durante essa operação.
 - Produtos do tipo `ficha_sinuca` não aceitam entradas de estoque. Suas quantidades vendidas são registradas no módulo de vendas, sem baixa de estoque.
-- O custo da compra não altera `valor_unitario`, que continua sendo o preço de venda do produto, nem cria uma despesa duplicada.
+- O custo da compra não altera `valor_unitario`, que representa o custo unitário de compra cadastrado, nem cria uma despesa duplicada.
 - As respostas incluem a entrada e o objeto `produto`, com ID, nome, tipo e saldo atual. Esse saldo é o da consulta, não o saldo histórico da data da compra.
 - Consultas sem resultados retornam `[]`. O único filtro aceito é `id_produto`; filtros desconhecidos, vazios ou repetidos são recusados.
 
@@ -142,7 +148,7 @@ O módulo de estoque permite cadastrar e consultar entradas. Edição e exclusã
 
 O módulo permite registrar vendas e consultar seu histórico, usando as tabelas existentes `venda` e `item_venda`. Administradores e funcionários acessam `POST /vendas`, `GET /vendas` e `GET /vendas/:id` com autenticação.
 
-O servidor calcula o total, preserva o preço de cada item, exige confirmação para bebidas alcoólicas e baixa o estoque dos produtos físicos. Venda, itens e baixas são gravados juntos. Fichas registram somente quantidade vendida e valor; reservas permanecem independentes.
+Cada item enviado em `POST /vendas` deve incluir `valor_unitario`, informado pelo operador como preço de venda. O servidor valida esse preço e calcula o total, preserva o preço de cada item, exige confirmação para bebidas alcoólicas e baixa o estoque dos produtos físicos. Venda, itens e baixas são gravados juntos. Fichas registram somente quantidade vendida e valor; reservas permanecem independentes.
 
 Consulte [o guia de vendas](docs/vendas.md) para os campos, exemplo de cadastro, respostas e limites desta etapa, incluindo a decisão de bloquear envios repetidos somente na interface.
 
@@ -208,7 +214,7 @@ Exemplo de corpo para POST /usuarios (dados ficticios para preenchimento manual)
 }
 ```
 
-- `tipo_acesso`: administrador ou funcionario. O primeiro administrador usa `/auth/cadastro-inicial`; `POST /usuarios` aceita apenas funcionario. O perfil não pode ser alterado pelo cadastro.
+- `tipo_acesso`: administrador ou funcionario. Administradores são cadastrados em `/auth/cadastro-inicial` com a chave de configuração; `POST /usuarios` aceita apenas funcionario. O perfil não pode ser alterado pelo cadastro.
 - `tipo_contratacao`: temporario ou efetivo. Por enquanto, o banco exige esse campo e data_inicio inclusive para administradores; a estrutura nao foi alterada.
 - `situacao`: booleano; se omitido no cadastro, assume true. Para inativar, envie PATCH /usuarios/:id com `{"situacao":false}`. Para reativar, envie true. Nao ha exclusao fisica de usuarios.
 - CPF: aceita 11 digitos ou mascara 000.000.000-00; salva somente digitos. A validacao atual e de formato, conforme a restricao do banco, sem verificacao dos digitos verificadores.
@@ -223,9 +229,9 @@ Testes automatizados de usuarios ficaram pendentes conforme combinado. A sintaxe
 
 ## Login e permissões
 
-Consulte [o guia de autenticação](docs/autenticacao.md) para criar o primeiro administrador, fazer login no Postman/Insomnia e revisar a matriz de permissões.
+Consulte [o guia de autenticação](docs/autenticacao.md) para cadastrar administradores, fazer login no Postman/Insomnia e revisar a matriz de permissões.
 
-- `POST /auth/cadastro-inicial`: primeiro administrador, com a chave local no cabeçalho X-Setup-Token; bloqueado depois que já existe administrador.
+- `POST /auth/cadastro-inicial`: cadastro de administradores com a chave local no cabeçalho `X-Setup-Token`, inclusive quando já existe administrador. Para desabilitar novos cadastros, esvazie `ADMIN_SETUP_TOKEN` e reinicie a API.
 - `POST /auth/login`: email e senha; devolve JWT com validade de uma hora.
 - `GET /auth/me`: dados básicos do usuário autenticado.
 - `POST /auth/recuperar-senha`: solicita um link de recuperação por email.
@@ -235,15 +241,15 @@ Consulte [o guia de autenticação](docs/autenticacao.md) para criar o primeiro 
 
 As chaves reais estão somente no `.env`, ignorado pelo Git. A estrutura do banco não foi alterada.
 
-Consulte [o guia de recuperação de senha](docs/recuperacao-senha.md) para configurar o Gmail e integrar as futuras telas React. O link expira em 15 minutos e deixa de funcionar após a troca; a alteração da senha ou do email também invalida os JWTs de login anteriores. As credenciais SMTP devem ser preenchidas localmente antes de usar o envio.
+Consulte [o guia de recuperação de senha](docs/recuperacao-senha.md) para configurar o Gmail e usar as telas de solicitação e redefinição. O link expira em 15 minutos e deixa de funcionar após a troca; a alteração da senha ou do email também invalida os JWTs de login anteriores. As credenciais SMTP devem ser preenchidas localmente antes de usar o envio.
 
 ## Frontend: acesso ao sistema
 
 Na raiz do projeto, instale as dependências da interface com `npm --prefix web install`.
 Mantenha dois terminais abertos: `npm run dev` para a API e `npm run dev:web` para o React.
-Abra http://localhost:5173. Entre com uma conta já cadastrada no banco.
+Abra http://localhost:5173. Entre com uma conta cadastrada ou use o link Cadastrar administrador no login, informando a chave de configuração. O pgAdmin não precisa permanecer aberto; o serviço PostgreSQL precisa estar em execução.
 
-O frontend inclui login, solicitação de recuperação, nova senha pelo link do email e um dashboard protegido com os indicadores do bar, os dados básicos do usuário e saída. Dashboard, Produtos, Estoque, Vendas, Reservas, Despesas, Relatórios e Funcionários estão implementados; as telas dos demais módulos continuam para as próximas etapas. Não são exibidos dados fictícios na aplicação.
+O frontend inclui login, solicitação de recuperação, nova senha pelo link do email e um dashboard protegido com os indicadores do bar, os dados básicos do usuário e saída. Dashboard, Produtos, Estoque, Vendas, Reservas, Despesas, Relatórios e Funcionários estão implementados. Não são exibidos dados fictícios na aplicação.
 
 Consulte [o guia do frontend](docs/frontend.md) para estrutura, configuração e limites desta etapa. `npm run build:web` gera a interface em `web/dist`, ignorada pelo Git.
 
@@ -263,4 +269,4 @@ Relatórios financeiros estão disponíveis em /relatorios para administradores,
 
 Funcionários está disponível em /funcionarios para administradores: busca, filtro de situação, cadastro, consulta, edição e inativação/reativação. Consulte [o guia](docs/funcionarios-web.md).
 
-O cadastro inicial do administrador também está disponível em /cadastro-inicial, pelo link Primeiro acesso no login. Exige a chave de configuração local; consulte [autenticação](docs/autenticacao.md).
+O cadastro de administradores está disponível em /cadastro-inicial, pelo link Cadastrar administrador no login. Exige a chave de configuração local; consulte [autenticação](docs/autenticacao.md).

@@ -22,7 +22,7 @@ Respostas de erro preservam o formulário. Conflitos exigem nova consulta. Cliqu
 
 ## Situação atual das mesas
 
-GET /mesas mostra disponível, ocupada ou manutenção. Ambos os perfis podem selecionar outra situação e salvar, enviando PATCH /mesas/:id somente com status. Essa ação não altera reservas existentes. A tela não cadastra, renumera nem exclui mesas nesta etapa.
+GET /mesas mostra disponível, ocupada ou manutenção. Ambos os perfis podem selecionar outra situação e salvar, enviando PATCH /mesas/:id somente com status. Essa ação não altera reservas existentes. O administrador também pode cadastrar, renumerar e excluir mesas pelo botão Gerenciar mesas, conforme a seção abaixo.
 
 O status atual e a disponibilidade para o período são apresentados separadamente. Uma mesa ocupada agora pode estar livre na agenda do horário desejado. Manutenção e sobreposição impedem a reserva. Reservar não muda automaticamente o status da mesa, não controla partidas ou filas e não gera vendas.
 

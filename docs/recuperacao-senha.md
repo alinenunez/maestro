@@ -4,7 +4,7 @@ O backend atende ao RF03 com duas rotas públicas. O usuário recebe um link no 
 
 ## Configurar o Gmail
 
-No `.env` local, os dados públicos de conexão já estão preenchidos:
+Configure o `.env` do servidor. Os campos abaixo são um modelo; preencha as credenciais localmente:
 
 ```dotenv
 SMTP_HOST=smtp.gmail.com
@@ -26,9 +26,11 @@ Senhas de app exigem verificação em duas etapas e podem não estar disponívei
 
 A porta 587 usa STARTTLS: `SMTP_SECURE=false` inicia a conexão sem TLS implícito, mas `requireTLS: true` exige a negociação de criptografia antes da autenticação. Não significa envio sem proteção. Referências: [configuração SMTP do Gmail](https://support.google.com/mail/answer/7104828) e [transporte SMTP do Nodemailer](https://nodemailer.com/smtp).
 
-`RESET_PASSWORD_URL` é o endereço da futura página React para definir a nova senha. O servidor aceita HTTPS ou HTTP apenas em localhost/127.0.0.1/IPv6 local. Não inclua parâmetros, fragmento ou credenciais nesse valor. O backend acrescenta `#token=...` ao link. Em produção, substitua pelo endereço HTTPS da aplicação. A página React está implementada em web; execute npm run dev:web na raiz do projeto.
+`RESET_PASSWORD_URL` é o endereço da página React para definir a nova senha. O servidor aceita HTTPS ou HTTP apenas em localhost/127.0.0.1/IPv6 local. Não inclua parâmetros, fragmento ou credenciais nesse valor. O backend acrescenta `#token=...` ao link. Em produção, substitua pelo endereço HTTPS da aplicação. A página React está implementada em web; execute npm run dev:web na raiz do projeto.
 
 O `.env` continua ignorado pelo Git; `.env.example` contém somente configurações públicas e campos vazios para credenciais.
+
+A conta em `SMTP_USER` é o remetente usado pelo sistema, e `EMAIL_FROM` deve indicar esse mesmo Gmail. O destinatário é o email da conta ativa que solicitou a recuperação, consultado no banco. Não altere o `.env` a cada novo usuário; cadastre o email dele em Funcionários.
 
 ## Solicitar o link
 
@@ -68,7 +70,7 @@ Resposta HTTP 200:
 
 A senha segue a validação atual do cadastro: não pode ser vazia, deve corresponder à confirmação e ter até 72 bytes em UTF-8. A API grava somente o hash bcrypt. Não faz login automaticamente e agenda um email de aviso após a alteração.
 
-Para integrar o React, use `new URLSearchParams(window.location.hash.slice(1)).get("token")`. Mantenha o token apenas na memória da página e remova o fragmento com `history.replaceState` após a leitura. Não o coloque em logs ou armazenamento persistente. O fragmento evita enviá-lo ao servidor da página; a requisição de redefinição o envia no corpo JSON. As duas telas estão disponíveis; consulte frontend.md.
+A página React lê o token com `new URLSearchParams(window.location.hash.slice(1)).get("token")`. Mantenha o token apenas na memória da página e remova o fragmento com `history.replaceState` após a leitura. Não o coloque em logs ou armazenamento persistente. O fragmento evita enviá-lo ao servidor da página; a requisição de redefinição o envia no corpo JSON. As duas telas estão disponíveis; consulte frontend.md.
 
 ## Validade e sessões
 
@@ -96,4 +98,4 @@ O envio em segundo plano não possui fila persistente nem nova tentativa automá
 
 ## Conferência desta etapa
 
-A sintaxe e o fluxo local foram conferidos com conta e envio simulados, sem modificar usuários reais ou enviar mensagens. A suíte automatizada do projeto continua adiada conforme combinado. O envio real pelo Gmail depende de preencher as credenciais e verificar a chegada do email; a interface React já possui as telas de solicitação e redefinição.
+A sintaxe e o fluxo local foram conferidos com conta e envio simulados, sem modificar usuários reais ou enviar mensagens. A suíte automatizada do projeto continua adiada conforme combinado. O funcionamento da recuperação por email na instalação local foi confirmado pela responsável pelo projeto. Essa confirmação não substitui a validação de expiração, reutilização de links e limites de tentativas. Em outra instalação, configure o remetente Gmail e valide a entrega novamente; a interface possui as telas de solicitação e redefinição.

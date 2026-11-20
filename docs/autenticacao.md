@@ -9,7 +9,7 @@ O `.env` precisa de duas chaves diferentes:
 - `JWT_SECRET`: chave aleatória, com pelo menos 32 caracteres, para assinar os tokens.
 - `ADMIN_SETUP_TOKEN`: chave local, com pelo menos 32 caracteres, que autoriza o cadastro de administradores pela tela pública `/cadastro-inicial`. Pode ficar vazia para desabilitar novos cadastros.
 
-As duas foram geradas no `.env` local durante esta implementação. Seus valores não aparecem no `.env.example` e não devem ir para o Git. A senha do PostgreSQL foi preservada. Em outro computador, gere cada chave com `node -e "console.log(require('node:crypto').randomBytes(48).toString('base64url'))"` e preencha o `.env`. Reinicie o servidor após alterar esse arquivo.
+Mantenha os valores reais somente no `.env`, sem incluí-los no Git ou no `.env.example`. Na primeira instalação, gere cada chave com `node -e "console.log(require('node:crypto').randomBytes(48).toString('base64url'))"` e preencha o `.env`. Reinicie o servidor após alterar esse arquivo.
 
 Inicie com `npm run dev`. O endpoint `/health` permanece público. As rotas de negócio exigem autenticação. As rotas públicas `/auth/recuperar-senha` e `/auth/redefinir-senha` atendem à recuperação por email e possuem limites de tentativas. Configure os dados SMTP no `.env` conforme o [guia de recuperação](recuperacao-senha.md).
 
@@ -66,7 +66,7 @@ Authorization: Bearer TOKEN_RECEBIDO_NO_LOGIN
 - Perfil sem permissão: 403.
 - Falha ao consultar o banco durante autenticação: 503.
 
-Nesta etapa não há refresh token nem endpoint de logout. A futura interface encerrará o acesso local descartando o token. Tokens de login expiram em até uma hora e passam a ser recusados após a troca da senha ou do email, inclusive quando alterados pelo administrador. Usuários inativos são recusados enquanto estiverem inativos. Tokens emitidos antes da inclusão da versão da credencial exigem novo login.
+Nesta etapa não há refresh token nem endpoint de logout. A interface encerra o acesso local descartando o token em memória; recarregar a página também exige novo login. Tokens de login expiram em até uma hora e passam a ser recusados após a troca da senha ou do email, inclusive quando alterados pelo administrador. Usuários inativos são recusados enquanto estiverem inativos. Tokens emitidos antes da inclusão da versão da credencial exigem novo login.
 
 A recuperação por email usa um token separado, válido por 15 minutos. A alteração da senha invalida os links anteriores e não realiza login automático. Veja os campos e exemplos no [guia de recuperação de senha](recuperacao-senha.md).
 
@@ -78,8 +78,8 @@ A recuperação por email usa um token separado, válido por 15 minutos. A alter
 | Registrar e consultar entradas de estoque | Sim | Sim |
 | Registrar e consultar vendas | Sim | Sim |
 | Cadastrar, consultar, editar e cancelar reservas | Sim | Sim |
-| Registrar e consultar despesas | Sim | Não |
-| Consultar resumo financeiro por período | Sim | Não |
+| Registrar, consultar, editar e excluir despesas | Sim | Não |
+| Consultar resumo e detalhamento financeiro por período | Sim | Não |
 | Consultar dashboard | Sim | Sim |
 | Criar, editar ou excluir produtos | Sim | Não |
 | Consultar mesas | Sim | Sim |
@@ -91,13 +91,13 @@ A recuperação por email usa um token separado, válido por 15 minutos. A alter
 
 `GET /usuarios/responsaveis` fornece apenas ID e nome dos usuários ativos para a seleção do responsável pelas vendas. Não libera CPF, email ou outros dados cadastrais aos funcionários. O administrador não pode inativar o próprio acesso.
 
-As rotas de estoque usam a permissão GERENCIAR_ESTOQUE, disponível aos dois perfis. As rotas de vendas usam REGISTRAR_VENDAS, também disponível aos dois perfis. As rotas de reservas usam GERENCIAR_RESERVAS, disponível aos dois perfis. As rotas de despesas usam GERENCIAR_DESPESAS, exclusiva do administrador, e identificam automaticamente o responsável pelo usuário autenticado. A rota /relatorios/financeiro usa CONSULTAR_RELATORIOS, exclusiva do administrador. A rota /dashboard usa CONSULTAR_DASHBOARD, disponível aos dois perfis; ela não expõe custos ou despesas do relatório financeiro.
+As rotas de estoque usam a permissão GERENCIAR_ESTOQUE, disponível aos dois perfis. As rotas de vendas usam REGISTRAR_VENDAS, também disponível aos dois perfis. As rotas de reservas usam GERENCIAR_RESERVAS, disponível aos dois perfis. As rotas de despesas usam GERENCIAR_DESPESAS, exclusiva do administrador, e definem o responsável no cadastro pelo usuário autenticado; a edição preserva esse responsável original. As rotas /relatorios/financeiro e /relatorios/financeiro/detalhado usam CONSULTAR_RELATORIOS, exclusiva do administrador. A rota /dashboard usa CONSULTAR_DASHBOARD, disponível aos dois perfis; ela não expõe custos ou despesas do relatório financeiro.
 
 ## Revisão
 
 Foram feitas verificação de sintaxe, carregamento das estratégias e conferência manual dos bloqueios sem token, com token inválido e sem chave de cadastro inicial. Os testes automatizados ficaram para depois, conforme combinado; os testes antigos de mesas e produtos ainda precisarão ser adaptados às rotas autenticadas. Nenhuma conta foi criada automaticamente e nenhum dado cadastral foi alterado para esta revisão.
 
-## Tela do cadastro inicial
+## Tela de cadastro de administradores
 
 A página React /cadastro-inicial usa o layout de autenticação. Reúne nome, CPF, e-mail, nascimento, início, contratação, senha, confirmação e chave de cadastro de administrador. Data de início e contratação continuam obrigatórias no banco; não foi adicionado função/cargo. CPF recebe validação de formato, igual à API.
 

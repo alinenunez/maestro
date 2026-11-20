@@ -4,14 +4,14 @@ A tela /vendas está disponível para administrador e funcionário, usando REGIS
 
 ## Montar e finalizar o pedido
 
-- Os produtos de GET /produtos podem ser filtrados por nome e tipo. A escolha usa o ID do cadastro; trocar o filtro limpa a seleção. Tipos antigos não padronizados não aparecem na seleção.
-- Preço unitário e subtotal são somente leitura. Os cálculos da interface usam centavos inteiros (BigInt), com limite de NUMERIC(12,2), assim como o backend. Preço zero é aceito; quantidades devem ser inteiros positivos até 2147483647.
-- Adicionar o mesmo produto soma as quantidades em uma linha. A disponibilidade considera toda a quantidade já no pedido. Remover retira apenas o item escolhido e recalcula o total. Nenhuma dessas ações grava uma venda ou movimenta estoque.
+- Os produtos de GET /produtos podem ser filtrados por tipo. A escolha usa o ID do cadastro; trocar o filtro limpa a seleção. Tipos antigos não padronizados não aparecem na seleção.
+- O operador informa o valor unitário de venda, aceitando vírgula ou ponto decimal, sem separador de milhar. O campo começa vazio e é limpo ao trocar produto ou tipo. O subtotal é somente leitura e acompanha automaticamente preço × quantidade. Os cálculos da interface usam centavos inteiros (BigInt), com limite de NUMERIC(12,2), assim como o backend. Preço zero é aceito; quantidades devem ser inteiros positivos até 2147483647.
+- Adicionar o mesmo produto com o mesmo preço soma as quantidades em uma linha. Um preço diferente é recusado; para alterá-lo, remova o item e adicione novamente com a quantidade total e o preço desejado. A disponibilidade considera toda a quantidade já no pedido. Remover retira apenas o item escolhido e recalcula o total. Nenhuma dessas ações grava uma venda ou movimenta estoque.
 - Fichas de sinuca podem ser vendidas mesmo com saldo zero e não geram baixa de estoque nem reserva.
 - O responsável é selecionado explicitamente a partir de GET /usuarios/responsaveis (usuários ativos). O operador autenticado não substitui a escolha.
 - A confirmação de maioridade aparece ao selecionar bebida alcoólica ou quando o pedido contém álcool. É exigida para adicionar álcool e para finalizar todo o pedido, mesmo após selecionar outro tipo. O próximo pedido começa com a confirmação desmarcada.
-- Antes de enviar a venda, a tela reconsulta produtos e responsáveis. Se um preço/tipo mudou, atualiza o resumo e exige nova finalização após revisão. Estoque insuficiente, responsável indisponível e produtos inválidos impedem o envio, preservando o pedido para correção.
-- POST /vendas recebe somente id_usuario, confirmacao_maior_idade e itens com id_produto/quantidade. O backend continua responsável por preços definitivos, total, data/hora, validação e transação. Alterações entre a última consulta e a gravação ainda são verificadas pelo backend; a mensagem de sucesso mostra o total efetivamente registrado.
+- Antes de enviar a venda, a tela reconsulta produtos e responsáveis. Se o tipo mudou, atualiza o resumo e exige nova finalização após revisão. O preço digitado é preservado, mesmo que o custo de compra no cadastro tenha mudado. Estoque insuficiente, responsável indisponível e produtos inválidos impedem o envio, preservando o pedido para correção.
+- POST /vendas recebe somente id_usuario, confirmacao_maior_idade e itens com id_produto/quantidade/valor_unitario. O backend valida os preços informados e recalcula o total, define data/hora e mantém a transação. Alterações entre a última consulta e a gravação ainda são verificadas pelo backend; a mensagem de sucesso mostra o total efetivamente registrado.
 - Após sucesso, o pedido e os campos são limpos, e produtos, responsáveis e histórico são recarregados. Os indicadores do dashboard são consultados ao retornar àquela tela.
 
 ## Envios repetidos e falhas
@@ -28,4 +28,4 @@ O pedido fica apenas em memória: sair da página ou recarregá-la descarta o ra
 
 GET /vendas apresenta número, data/hora em America/Sao_Paulo, responsável e total, com botão Atualizar histórico. Ver itens abre um diálogo com GET /vendas/:id, exibindo quantidades e preços praticados naquela venda, sem recalcular pelos preços atuais. Há estados de carregamento, erro com nova tentativa e lista vazia; consultas são canceladas ao sair ou fechar os detalhes.
 
-A lista segue a ordem da API, sem filtros ou paginação nesta etapa, com rolagem própria. Não há edição ou cancelamento de vendas. As permissões seguem sendo verificadas no servidor. Nenhuma tabela, rota ou regra de backend foi alterada. A suíte de testes automatizados permanece adiada conforme combinado.
+A lista segue a ordem da API, sem filtros ou paginação nesta etapa, com rolagem própria. Não há edição ou cancelamento de vendas. As permissões seguem sendo verificadas no servidor. Nenhuma tabela ou rota foi adicionada. O contrato de POST /vendas exige agora valor_unitario em cada item. A suíte de testes automatizados permanece adiada conforme combinado.

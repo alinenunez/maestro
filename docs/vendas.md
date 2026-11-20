@@ -25,22 +25,22 @@ Exemplo fictício para `POST /vendas`, com `Content-Type: application/json` (sub
   "id_usuario": 1,
   "confirmacao_maior_idade": true,
   "itens": [
-    { "id_produto": 1, "quantidade": 3 },
-    { "id_produto": 2, "quantidade": 4 },
-    { "id_produto": 3, "quantidade": 1 }
+    { "id_produto": 1, "quantidade": 3, "valor_unitario": "9.00" },
+    { "id_produto": 2, "quantidade": 4, "valor_unitario": "5.00" },
+    { "id_produto": 3, "quantidade": 1, "valor_unitario": "16.00" }
   ]
 }
 ```
 
-O responsável e pelo menos um item são obrigatórios. Cada item aceita somente `id_produto` e `quantidade`, um número inteiro positivo. Produtos repetidos são agrupados somando suas quantidades, respeitando a chave composta de `item_venda`. A disponibilidade é conferida pela quantidade acumulada.
+O responsável e pelo menos um item são obrigatórios. Cada item exige `id_produto`, `quantidade` (inteiro positivo) e `valor_unitario` (preço de venda informado pelo operador). O preço aceita número ou string decimal não negativa, com até dez dígitos inteiros e duas casas decimais, usando ponto. Preço ausente, negativo, booleano, com vírgula ou mais casas é recusado com 400. Produtos repetidos são agrupados apenas quando os preços normalizados são iguais; preços diferentes são recusados, respeitando a chave composta de `item_venda`. A disponibilidade é conferida pela quantidade acumulada.
 
 `confirmacao_maior_idade` aceita somente booleano e assume `false` quando omitido. Havendo qualquer produto do tipo `bebida_alcoolica`, precisa ser `true` para a venda ser concluída. A confirmação é informada pelo atendente; a API não a preenche automaticamente.
 
-O servidor define data/hora, preços unitários e total. Não envie esses campos: eles serão recusados. Os preços vêm do cadastro no momento da finalização. Produtos com tipos antigos não padronizados ou preços inválidos precisam ser corrigidos antes de vender.
+O servidor define data/hora e recalcula o total; não aceita total ou subtotal enviado pelo cliente. O preço de cada item é informado pelo operador autenticado, validado e preservado na venda. `produtos.valor_unitario` representa custo de compra e não é usado para cobrar o cliente. Produtos com tipos antigos não padronizados precisam ser corrigidos antes de vender.
 
 ## Valores e estoque
 
-- O preço de venda de cada produto é copiado para `item_venda.valor_unitario`. Mudanças posteriores no cadastro não recalculam vendas anteriores.
+- O preço informado para cada item é salvo em `item_venda.valor_unitario`. Mudanças posteriores no cadastro não recalculam vendas anteriores.
 - O total soma quantidade vezes preço de cada item. O cálculo usa centavos inteiros (`BigInt`) para evitar imprecisão decimal. Os valores são gravados e devolvidos como strings decimais, por exemplo `"63.00"`, dentro do limite de `NUMERIC(12,2)`.
 - O saldo dos produtos físicos precisa cobrir a quantidade solicitada. Uma venda que consome exatamente o saldo é permitida e deixa estoque zero.
 - Para `ficha_sinuca`, quantidade e valor são registrados na venda, mas não se exige saldo nem se executa baixa de estoque.
@@ -57,7 +57,7 @@ O detalhe da venda usa os preços históricos dos itens. O nome e o tipo do prod
 
 - `201`: venda registrada, com cabeçalho `Location: /vendas/ID`.
 - `200`: consulta concluída.
-- `400`: corpo, ID ou quantidade inválidos, pedido vazio, campos não permitidos, total acima do limite ou ausência de confirmação para álcool.
+- `400`: corpo, ID, quantidade ou preço inválidos, pedido vazio, campos não permitidos, total acima do limite ou ausência de confirmação para álcool.
 - `401`: autenticação ausente ou inválida.
 - `403`: perfil sem permissão.
 - `404`: venda, produto ou responsável inexistente.
@@ -79,4 +79,4 @@ A tela de vendas implementa:
 
 Essa decisão cobre cliques repetidos durante o processamento na mesma tela. O cenário CT07-03 de repetição direta da solicitação continua sem garantia no backend: cada POST válido cria uma venda, mesmo com corpo idêntico. A transação continua protegendo contra gravações parciais.
 
-Os testes automatizados foram adiados conforme combinado. A conferência desta entrega se limita à sintaxe, carregamento da aplicação e compatibilidade dos modelos/consultas com o banco em acesso somente de leitura; não certifica os cenários funcionais de gravação, falha ou concorrência.
+Os testes automatizados foram adiados conforme combinado. Na alteração para preço de venda informado pelo operador, foram conferidos com dados fictícios em memória: preservação do preço, separação do custo, cálculo em centavos, agrupamento, preços inválidos, limites, estoque e maioridade. A compilação da interface passou. Essas verificações não certificam os cenários completos de gravação, falha ou concorrência no PostgreSQL.

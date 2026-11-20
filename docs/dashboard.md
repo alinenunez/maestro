@@ -113,7 +113,7 @@ Conferências desta etapa: sintaxe, carregamento da aplicação e execução da 
 
 ## Blocos do protótipo e interface React
 
-O login agora abre /dashboard. /inicio redireciona para essa tela. Administrador e funcionário veem os indicadores, seu nome/perfil e Sair. A navegação é adaptada por perfil: funcionários não recebem as opções de gerenciamento de funcionários, produtos, despesas e relatórios. As opções dos módulos ainda sem tela ficam desabilitadas; somente Dashboard navega nesta etapa. Isso não substitui a autorização da API.
+O login agora abre /dashboard. /inicio redireciona para essa tela. Administrador e funcionário veem os indicadores, seu nome/perfil e Sair. A navegação é adaptada por perfil: funcionários acessam Dashboard, Produtos (consulta), Estoque, Vendas e Reservas. Funcionários, Despesas e Relatórios são exclusivos do administrador. Todas essas telas estão implementadas; a escrita de produtos e o gerenciamento de mesas também são exclusivos do administrador. Isso não substitui a autorização da API.
 
 A tela inclui carregamento inicial, listas vazias, meta indisponível, nenhum cadastro de mesa e erros. Uma falha de atualização preserva os últimos dados, com aviso explícito de que estão desatualizados. Uma resposta 401 encerra a sessão. Requisições em andamento são canceladas ao sair da tela e atualizações não se sobrepõem.
 
