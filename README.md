@@ -45,7 +45,7 @@ Os arquivos .gitkeep mantêm as pastas vazias no Git.
 
 O servidor verifica a conexão antes de iniciar e escuta apenas no computador local. A rota /health retorna 503 se o banco ficar indisponível. Não usamos sync: as tabelas existentes são preservadas.
 
-`index.js` configura a aplicação, registra as rotas e inicia o servidor; `src/database/connection.js` configura o Sequelize. Autenticação, permissões, entradas de estoque, vendas, reservas, cadastro/consulta de despesas, resumo financeiro e backend do dashboard estão implementados. O detalhamento dos relatórios financeiros também está disponível. A base React e as telas de acesso estão implementadas. As telas dos módulos de negócio serão desenvolvidas nas próximas etapas.
+`index.js` configura a aplicação, registra as rotas e inicia o servidor; `src/database/connection.js` configura o Sequelize. Autenticação, permissões, entradas de estoque, vendas, reservas, cadastro, consulta, edição e exclusão de despesas, resumo financeiro e backend do dashboard estão implementados. O detalhamento dos relatórios financeiros também está disponível. A base React e as telas de acesso estão implementadas. As telas dos módulos de negócio serão desenvolvidas nas próximas etapas.
 
 ## Cadastro de mesas
 
@@ -156,11 +156,11 @@ Consulte [o guia de reservas](docs/reservas.md) para exemplos, horários com fus
 
 ## Registro de despesas
 
-O módulo usa a tabela existente `despesa` e permite ao administrador registrar e consultar custos operacionais pelo `POST /despesas`, `GET /despesas` e `GET /despesas/:id`. Funcionários não têm acesso a essas rotas.
+O módulo usa a tabela existente `despesa` e permite ao administrador registrar, consultar, editar e excluir custos operacionais por `POST /despesas`, `GET /despesas`, `GET /despesas/:id`, `PATCH /despesas/:id` e `DELETE /despesas/:id`. Funcionários não têm acesso a essas rotas.
 
 O cadastro exige tipo (`manutencao`, `energia`, `agua`, `limpeza` ou `outros`), valor positivo e data do pagamento. O responsável é definido automaticamente pelo usuário autenticado. Compras de produtos continuam em `controle_estoque`, sem gerar despesas automaticamente.
 
-Consulte [o guia de despesas](docs/despesas.md) para o exemplo de cadastro, validações e respostas. O módulo inclui cadastro e consulta, sem edição ou exclusão. Seus valores alimentam o resumo financeiro em /relatorios/financeiro. Não é necessário executar novo SQL.
+Consulte [o guia de despesas](docs/despesas.md) para o exemplo de cadastro, validações e respostas. A edição preserva o responsável original. A exclusão é permanente e exige confirmação na interface. Seus valores alimentam o resumo financeiro em /relatorios/financeiro. Não é necessário executar novo SQL.
 
 ## Resumo financeiro
 
@@ -257,8 +257,10 @@ A tela de [vendas](docs/vendas-web.md) está disponível em /vendas para montar 
 
 A tela de [reservas](docs/reservas-web.md), em /reservas, permite consultar disponibilidade, reservar várias mesas, editar, cancelar e atualizar a situação atual do salão.
 
-A tela de [despesas](docs/despesas-web.md), em /despesas, permite ao administrador registrar pagamentos e consultar o histórico com o total listado.
+A tela de [despesas](docs/despesas-web.md), em /despesas, permite ao administrador registrar, editar e excluir pagamentos e consultar o histórico com o total listado.
 
 Relatórios financeiros estão disponíveis em /relatorios para administradores, com período, resumo e detalhamento de vendas, compras e despesas. Consulte [o guia](docs/relatorios.md).
 
 Funcionários está disponível em /funcionarios para administradores: busca, filtro de situação, cadastro, consulta, edição e inativação/reativação. Consulte [o guia](docs/funcionarios-web.md).
+
+O cadastro inicial do administrador também está disponível em /cadastro-inicial, pelo link Primeiro acesso no login. Exige a chave de configuração local; consulte [autenticação](docs/autenticacao.md).

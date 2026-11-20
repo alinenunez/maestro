@@ -17,7 +17,7 @@ Inicie com `npm run dev`. O endpoint `/health` permanece público. As rotas de n
 
 Se já existe um administrador, use o login. A existência de um administrador inativo também encerra a possibilidade de cadastro inicial: inativar alguém não reabre o cadastro.
 
-Se não existe administrador, envie `POST /auth/cadastro-inicial` no Postman/Insomnia:
+Se não existe administrador, abra `/cadastro-inicial` pelo link Primeiro acesso na tela de login. Informe os dados e a chave local de configuração. Alternativamente, envie `POST /auth/cadastro-inicial` no Postman/Insomnia:
 
 - Cabeçalho `Content-Type`: `application/json`.
 - Cabeçalho `X-Setup-Token`: o valor de `ADMIN_SETUP_TOKEN` do seu `.env` local.
@@ -98,3 +98,13 @@ As rotas de estoque usam a permissão GERENCIAR_ESTOQUE, disponível aos dois pe
 ## Revisão
 
 Foram feitas verificação de sintaxe, carregamento das estratégias e conferência manual dos bloqueios sem token, com token inválido e sem chave de cadastro inicial. Os testes automatizados ficaram para depois, conforme combinado; os testes antigos de mesas e produtos ainda precisarão ser adaptados às rotas autenticadas. Nenhuma conta foi criada automaticamente e nenhum dado cadastral foi alterado para esta revisão.
+
+## Tela do cadastro inicial
+
+A página React /cadastro-inicial usa o layout de autenticação. Reúne nome, CPF, e-mail, nascimento, início, contratação, senha, confirmação e chave de cadastro inicial. Data de início e contratação continuam obrigatórias no banco; não foi adicionado função/cargo. CPF recebe validação de formato, igual à API.
+
+A chave é o valor de ADMIN_SETUP_TOKEN, preenchido manualmente pela pessoa responsável pela instalação. Não coloque essa variável no frontend nem em VITE_*. A interface envia a chave apenas no cabeçalho X-Setup-Token de POST /auth/cadastro-inicial; nunca na URL, corpo JSON ou armazenamento local. Senhas e chave ficam somente no estado da página, são descartadas ao sair e limpas após sucesso ou resposta inconclusiva. Nenhuma credencial foi alterada para implementar a tela.
+
+O backend continua definindo perfil administrador e situação ativa, validando a chave e impedindo um segundo cadastro, inclusive se o administrador existente estiver inativo. A página não consulta publicamente a existência de contas: 403 e 409 são exibidos conforme a resposta da API. Quem já está autenticado é redirecionado ao dashboard.
+
+Após sucesso, a tela encaminha ao login com mensagem de confirmação, sem autenticação automática. Cliques repetidos ficam bloqueados durante o envio. Em falha de rede ou resposta 5xx, o formulário fica bloqueado e orienta tentar o login antes de iniciar outro cadastro, pois a criação pode ter ocorrido.

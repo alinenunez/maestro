@@ -1,0 +1,9 @@
+.cadastro-inicial .auth-card { width:100%; max-width:760px; }
+.cadastro-inicial .auth-main { width:100%; }
+.cadastro-inicial fieldset { min-width:0; border:0; padding:0; margin:0; }
+.cadastro-inicial-campos { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 22px; }
+.cadastro-inicial input { min-width:0; }
+.cadastro-inicial select { width:100%; min-height:50px; padding:12px 15px; border:1.5px solid #c3c6db; border-radius:10px; background:#fafbff; color:#151637; font:inherit; }
+.cadastro-inicial select:focus-visible { outline:3px solid #bb8a19; outline-offset:2px; }
+.cadastro-inicial-ajuda { font-size:12px; color:#626780; line-height:1.7; margin:12px 0; }
+@media(max-width:650px) { .cadastro-inicial-campos { grid-template-columns:1fr; } }

@@ -14,4 +14,10 @@ const listar = () => Despesa.findAll({
 const buscarPorId = id => Despesa.findByPk(id, { include: [incluirUsuario] });
 const criar = dados => Despesa.create(dados);
 
-module.exports = { listar, buscarPorId, criar };
+async function atualizar(id, dados) {
+    const [, despesas] = await Despesa.update(dados, { where: { id_despesa: id }, returning: true });
+    return despesas[0] || null;
+}
+const remover = id => Despesa.destroy({ where: { id_despesa: id } });
+
+module.exports = { listar, buscarPorId, criar, atualizar, remover };

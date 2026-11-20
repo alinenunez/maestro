@@ -20,4 +20,15 @@ async function criar(req, res) {
     } catch (erro) { responderErro(res, erro); }
 }
 
-module.exports = { listar, buscarPorId, criar };
+async function atualizar(req, res) {
+    try { res.json(await service.atualizar(req.params.id, req.body)); } catch (erro) { responderErro(res, erro); }
+}
+
+async function remover(req, res) {
+    try {
+        await service.remover(req.params.id);
+        res.status(204).end();
+    } catch (erro) { responderErro(res, erro); }
+}
+
+module.exports = { listar, buscarPorId, criar, atualizar, remover };

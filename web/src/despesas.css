@@ -17,5 +17,10 @@
 .despesa-data { white-space:nowrap; }
 .despesas-layout .estado-vazio .atualizar { margin-top:15px; }
 .despesas-layout td:last-child { overflow-wrap:anywhere; }
+.despesas-acoes { display:flex; gap:8px; }
+.despesas-acoes .atualizar { padding:8px 12px; font-size:12px; }
+.despesas-acoes .despesa-excluir { color:#a12424; border-color:#dcb3b3; }
+.despesa-cancelar { margin-top:12px; }
+.despesas-revisar { white-space:normal; }
 @media(max-width:1000px) { .despesas-layout { grid-template-columns:1fr; } .despesas-editor { max-width:600px; width:100%; } }
 @media(max-width:450px) { .despesas-editor { padding:22px; } .despesas-total strong { font-size:32px; } }

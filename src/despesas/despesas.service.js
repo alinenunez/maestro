@@ -22,25 +22,28 @@ function validarData(valor) {
     return valor;
 }
 
-function preparar(dados) {
+function preparar(dados, parcial = false) {
     if (!dados || typeof dados !== "object" || Array.isArray(dados) || !Object.keys(dados).length) {
         throw falha("Envie os dados da despesa em um objeto JSON.");
     }
     if (Object.keys(dados).some(campo => !campos.includes(campo))) {
         throw falha("Envie apenas tipo_despesa, valor e data_pagamento. O responsavel e definido pela autenticacao.");
     }
-    const tipo = typeof dados.tipo_despesa === "string" ? dados.tipo_despesa.trim().toLowerCase() : "";
-    if (!tiposPermitidos.includes(tipo)) throw falha(`tipo_despesa deve ser um dos seguintes: ${tiposPermitidos.join(", ")}.`);
-
-    const valor = dados.valor;
-    if (!["number", "string"].includes(typeof valor) || !/^\d{1,10}(\.\d{1,2})?$/.test(String(valor)) || Number(valor) <= 0) {
-        throw falha("valor deve ser maior que zero, com ate 10 digitos inteiros e 2 decimais. Use ponto decimal.");
+    const preparados = {};
+    if (!parcial || Object.hasOwn(dados, "tipo_despesa")) {
+        const tipo = typeof dados.tipo_despesa === "string" ? dados.tipo_despesa.trim().toLowerCase() : "";
+        if (!tiposPermitidos.includes(tipo)) throw falha(`tipo_despesa deve ser um dos seguintes: ${tiposPermitidos.join(", ")}.`);
+        preparados.tipo_despesa = tipo;
     }
-    return {
-        tipo_despesa: tipo,
-        valor: String(valor),
-        data_pagamento: validarData(dados.data_pagamento),
-    };
+    if (!parcial || Object.hasOwn(dados, "valor")) {
+        const valor = dados.valor;
+        if (!["number", "string"].includes(typeof valor) || !/^\d{1,10}(\.\d{1,2})?$/.test(String(valor)) || Number(valor) <= 0) {
+            throw falha("valor deve ser maior que zero, com ate 10 digitos inteiros e 2 decimais. Use ponto decimal.");
+        }
+        preparados.valor = String(valor);
+    }
+    if (!parcial || Object.hasOwn(dados, "data_pagamento")) preparados.data_pagamento = validarData(dados.data_pagamento);
+    return preparados;
 }
 
 const listar = () => repository.listar();
@@ -58,4 +61,17 @@ function criar(dados, idUsuarioAutenticado) {
     return repository.criar(preparados);
 }
 
-module.exports = { listar, buscarPorId, criar };
+async function atualizar(id, dados) {
+    const idValidado = validarId(id, "id_despesa");
+    // A edição preserva o usuário que registrou a despesa originalmente.
+    const despesa = await repository.atualizar(idValidado, preparar(dados, true));
+    if (!despesa) throw falha("Despesa nao encontrada.", 404);
+    return despesa;
+}
+
+async function remover(id) {
+    const removidas = await repository.remover(validarId(id, "id_despesa"));
+    if (!removidas) throw falha("Despesa nao encontrada.", 404);
+}
+
+module.exports = { listar, buscarPorId, criar, atualizar, remover };

@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
 import { useAuth } from "./contexts/AuthContext";
 import Login from "./pages/Login";
+import CadastroInicial from "./pages/CadastroInicial";
 import RecuperarSenha from "./pages/RecuperarSenha";
 import RedefinirSenha from "./pages/RedefinirSenha";
 import Dashboard from "./pages/Dashboard";
@@ -20,11 +21,12 @@ function RotaProtegida() {
 export default function App() {
     const { pathname } = useLocation();
     useEffect(() => {
-        const titulos = { "/login": "Entrar", "/recuperar-senha": "Recuperar senha", "/redefinir-senha": "Criar nova senha", "/produtos": "Produtos", "/estoque": "Estoque", "/vendas": "Vendas", "/reservas": "Reservas de mesas", "/despesas": "Despesas", "/relatorios": "Relatórios financeiros", "/funcionarios": "Funcionários", "/dashboard": "Dashboard", "/inicio": "Dashboard" };
+        const titulos = { "/login": "Entrar", "/cadastro-inicial": "Cadastrar administrador", "/recuperar-senha": "Recuperar senha", "/redefinir-senha": "Criar nova senha", "/produtos": "Produtos", "/estoque": "Estoque", "/vendas": "Vendas", "/reservas": "Reservas de mesas", "/despesas": "Despesas", "/relatorios": "Relatórios financeiros", "/funcionarios": "Funcionários", "/dashboard": "Dashboard", "/inicio": "Dashboard" };
         document.title = `${titulos[pathname] || "Acesso"} | Maestro`;
     }, [pathname]);
     return <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/cadastro-inicial" element={<CadastroInicial />} />
         <Route path="/recuperar-senha" element={<RecuperarSenha />} />
         <Route path="/redefinir-senha" element={<RedefinirSenha />} />
         <Route element={<RotaProtegida />}>

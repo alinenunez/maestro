@@ -1,4 +1,4 @@
-export async function requisicao(caminho, { metodo = "GET", dados, token, signal } = {}) {
+export async function requisicao(caminho, { metodo = "GET", dados, token, signal, chaveCadastro } = {}) {
     let resposta;
     try {
         resposta = await fetch(`/api${caminho}`, {
@@ -6,6 +6,7 @@ export async function requisicao(caminho, { metodo = "GET", dados, token, signal
             headers: {
                 ...(dados ? { "Content-Type": "application/json" } : {}),
                 ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                ...(chaveCadastro && caminho === "/auth/cadastro-inicial" ? { "X-Setup-Token": chaveCadastro } : {}),
             },
             body: dados ? JSON.stringify(dados) : undefined,
             signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(15000)]) : AbortSignal.timeout(15000),
