@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import CabecalhoPainel from "../components/CabecalhoPainel";
 import { useAuth } from "../contexts/AuthContext";
 import { dataNoite, dinheiro, numero } from "../utils/formatacao";
+import { centavos, limiteTotal, quantidadeValida, reais } from "../utils/calculoVenda";
 import "../dashboard.css";
 import "../estoque.css";
 
@@ -27,9 +28,8 @@ export default function Estoque() {
     const [erroHistorico, setErroHistorico] = useState("");
     const [filtroProduto, setFiltroProduto] = useState("");
     const [tipo, setTipo] = useState("");
-    const [busca, setBusca] = useState("");
     const [revisao, setRevisao] = useState(0);
-    const [form, setForm] = useState(() => ({ id_produto: "", quantidade_adquirida: "", valor_total: "", data_compra: hoje() }));
+    const [form, setForm] = useState(() => ({ id_produto: "", quantidade_adquirida: "", data_compra: hoje() }));
     const [ocupado, setOcupado] = useState(false);
     const [erro, setErro] = useState("");
     const [mensagem, setMensagem] = useState("");
@@ -54,31 +54,33 @@ export default function Estoque() {
         return () => controle.abort();
     }, [consultar, filtroProduto, revisao]);
 
-    const opcoes = (produtos || []).filter(produto => (!tipo || produto.tipo_produto === tipo) && produto.nome_produto.toLocaleLowerCase("pt-BR").includes(busca.trim().toLocaleLowerCase("pt-BR")));
+    const opcoes = (produtos || []).filter(produto => !tipo || produto.tipo_produto === tipo);
     const selecionado = opcoes.find(produto => String(produto.id_produto) === form.id_produto);
+    const valorUnitarioCentavos = selecionado ? centavos(selecionado.valor_unitario) : null;
+    const totalCompraCentavos = valorUnitarioCentavos !== null && quantidadeValida(form.quantidade_adquirida)
+        ? valorUnitarioCentavos * BigInt(form.quantidade_adquirida)
+        : null;
     const mudar = (campo, valor) => setForm(atual => ({ ...atual, [campo]: valor }));
 
     async function registrar(evento) {
         evento.preventDefault();
         if (trava.current) return;
         setErro(""); setMensagem("");
-        const valor = form.valor_total.trim().replace(",", ".");
         const quantidade = Number(form.quantidade_adquirida);
         if (!selecionado) { setErro("Selecione um produto da lista."); return; }
         if (!/^[1-9][0-9]*$/.test(form.quantidade_adquirida) || quantidade > 2147483647) {
             setErro("Informe uma quantidade inteira entre 1 e 2147483647."); return;
         }
-        if (!/^\d{1,10}(\.\d{1,2})?$/.test(valor)) {
-            setErro("Informe o valor total da compra, como 120,50, sem separador de milhar."); return;
-        }
+        if (valorUnitarioCentavos === null || totalCompraCentavos === null) { setErro("Não foi possível calcular o valor da compra com o preço cadastrado."); return; }
+        if (totalCompraCentavos > limiteTotal) { setErro("O valor total da compra ultrapassa o limite permitido."); return; }
         trava.current = true; setOcupado(true);
         try {
             await consultar("/estoque", { metodo: "POST", dados: {
                 id_produto: selecionado.id_produto, quantidade_adquirida: quantidade,
-                valor_total: valor, data_compra: form.data_compra,
+                valor_total: reais(totalCompraCentavos), data_compra: form.data_compra,
             } });
             setMensagem(`Entrada registrada: ${numero(quantidade)} unidade(s) de ${selecionado.nome_produto}. Saldo atualizado.`);
-            setForm(atual => ({ ...atual, quantidade_adquirida: "", valor_total: "" }));
+            setForm(atual => ({ ...atual, quantidade_adquirida: "" }));
             setRevisao(atual => atual + 1);
         } catch (erro) {
             // Sem resposta conclusiva, a compra pode ter sido gravada: nao repetir o POST automaticamente.
@@ -134,22 +136,19 @@ export default function Estoque() {
                             <option value="">Todos os tipos</option>{Object.entries(tipos).map(([valor, texto]) => <option key={valor} value={valor}>{texto}</option>)}
                         </select>
                     </div>
-                    <div className="campo"><label htmlFor="busca-entrada">Buscar produto por nome</label>
-                        <input id="busca-entrada" type="search" maxLength={150} value={busca} onChange={e => { setBusca(e.target.value); mudar("id_produto", ""); }} placeholder="Ex.: Heineken" />
-                    </div>
                     <div className="campo"><label htmlFor="produto-entrada">Produto</label>
                         <select id="produto-entrada" value={selecionado ? form.id_produto : ""} onChange={e => mudar("id_produto", e.target.value)} required>
                             <option value="">Selecione um produto</option>{opcoes.map(produto => <option key={produto.id_produto} value={produto.id_produto}>{produto.nome_produto}</option>)}
                         </select>
-                        {produtos?.length > 0 && !opcoes.length && <p className="estoque-ajuda" role="status">Nenhum produto encontrado. Ajuste o nome ou o tipo.</p>}
+                        {produtos?.length > 0 && !opcoes.length && <p className="estoque-ajuda" role="status">Nenhum produto encontrado para este tipo.</p>}
                         {selecionado && <p className="estoque-ajuda">Saldo atual: <strong>{numero(selecionado.quantidade_produto)} unidade(s)</strong></p>}
                     </div>
                     <div className="estoque-campos">
                         <div className="campo"><label htmlFor="quantidade-entrada">Quantidade comprada</label><input id="quantidade-entrada" type="number" min="1" max="2147483647" step="1" value={form.quantidade_adquirida} onChange={e => mudar("quantidade_adquirida", e.target.value)} required placeholder="24" /></div>
-                        <div className="campo"><label htmlFor="valor-entrada">Valor total (R$)</label><input id="valor-entrada" inputMode="decimal" value={form.valor_total} onChange={e => mudar("valor_total", e.target.value)} required placeholder="120,00" /></div>
+                        <div className="campo"><label htmlFor="valor-entrada">Valor total da compra</label><input id="valor-entrada" value={totalCompraCentavos === null ? "" : dinheiro(reais(totalCompraCentavos))} readOnly placeholder="Informe produto e quantidade" /></div>
                     </div>
                     <div className="campo"><label htmlFor="data-entrada">Data da compra</label><input id="data-entrada" type="date" min="0001-01-01" max="9999-12-31" value={form.data_compra} onChange={e => mudar("data_compra", e.target.value)} required /></div>
-                    <p className="estoque-ajuda">O valor é o custo total desta compra. O preço de venda do produto permanece o mesmo. Fichas de sinuca não possuem entradas de estoque.</p>
+                    <p className="estoque-ajuda">{selecionado && <>Valor unitário cadastrado: <strong>{dinheiro(selecionado.valor_unitario)}</strong>. </>}O valor total é calculado automaticamente pela quantidade e pelo valor unitário. Fichas de sinuca não possuem entradas de estoque.</p>
                     {erro && <p className="mensagem erro" role="alert">{erro}</p>}
                     <button className="botao-primario" disabled={!selecionado}>{ocupado ? "Registrando…" : "Registrar entrada"}</button>
                 </fieldset></form>
