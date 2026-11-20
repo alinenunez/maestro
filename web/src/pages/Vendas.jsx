@@ -16,7 +16,6 @@ export default function Vendas() {
     const [revisao, setRevisao] = useState(0);
     const [revisaoHistorico, setRevisaoHistorico] = useState(0);
     const [tipo, setTipo] = useState("");
-    const [busca, setBusca] = useState("");
     const [idProduto, setIdProduto] = useState("");
     const [quantidade, setQuantidade] = useState("1");
     const [idResponsavel, setIdResponsavel] = useState("");
@@ -41,7 +40,7 @@ export default function Vendas() {
         return () => controle.abort();
     }, [consultar, revisao]);
 
-    const opcoes = (catalogo?.produtos || []).filter(produto => tipos[produto.tipo_produto] && (!tipo || produto.tipo_produto === tipo) && produto.nome_produto.toLocaleLowerCase("pt-BR").includes(busca.trim().toLocaleLowerCase("pt-BR")));
+    const opcoes = (catalogo?.produtos || []).filter(produto => tipos[produto.tipo_produto] && (!tipo || produto.tipo_produto === tipo));
     const selecionado = opcoes.find(produto => String(produto.id_produto) === idProduto);
     const preco = selecionado ? centavos(selecionado.valor_unitario) : null;
     const subtotal = preco !== null && quantidadeValida(quantidade) ? preco * BigInt(quantidade) : null;
@@ -85,7 +84,7 @@ export default function Vendas() {
 
     function limparPedido() {
         setItens([]); setMaiorIdade(false); setIdProduto(""); setQuantidade("1");
-        setIdResponsavel(""); setTipo(""); setBusca(""); setErroItem(""); setErroPedido(""); setEnvioIncerto(false);
+        setIdResponsavel(""); setTipo(""); setErroItem(""); setErroPedido(""); setEnvioIncerto(false);
     }
 
     async function finalizar() {
@@ -153,12 +152,9 @@ export default function Vendas() {
                     : !catalogo ? <p className="venda-ajuda" role="status">Carregando produtos e responsáveis…</p>
                         : !catalogo.produtos.length && <p className="venda-ajuda" role="status">Nenhum produto cadastrado. Peça ao administrador para cadastrá-los em Produtos.</p>}
                 <form onSubmit={adicionar} noValidate><fieldset disabled={bloqueado || !catalogo}>
-                    <div className="venda-campos">
-                        <div className="campo"><label htmlFor="tipo-venda">Tipo do produto</label><select id="tipo-venda" value={tipo} onChange={e => { setTipo(e.target.value); setIdProduto(""); setErroItem(""); }}><option value="">Todos os tipos</option>{Object.entries(tipos).map(([valor, texto]) => <option key={valor} value={valor}>{texto}</option>)}</select></div>
-                        <div className="campo"><label htmlFor="busca-venda">Buscar produto por nome</label><input id="busca-venda" type="search" value={busca} maxLength={150} onChange={e => { setBusca(e.target.value); setIdProduto(""); setErroItem(""); }} placeholder="Ex.: Heineken" /></div>
-                    </div>
+                    <div className="campo"><label htmlFor="tipo-venda">Tipo do produto</label><select id="tipo-venda" value={tipo} onChange={e => { setTipo(e.target.value); setIdProduto(""); setErroItem(""); }}><option value="">Todos os tipos</option>{Object.entries(tipos).map(([valor, texto]) => <option key={valor} value={valor}>{texto}</option>)}</select></div>
                     <div className="campo"><label htmlFor="produto-venda">Produto</label><select id="produto-venda" required value={selecionado ? idProduto : ""} onChange={e => { setIdProduto(e.target.value); setErroItem(""); }}><option value="">Selecione um produto</option>{opcoes.map(produto => <option key={produto.id_produto} value={produto.id_produto}>{produto.nome_produto}</option>)}</select>
-                        {catalogo && !opcoes.length && <p className="venda-ajuda" role="status">Nenhum produto encontrado para esses filtros.</p>}
+                        {catalogo && !opcoes.length && <p className="venda-ajuda" role="status">Nenhum produto encontrado para esse tipo.</p>}
                         {selecionado && <p className="venda-ajuda">{selecionado.tipo_produto === "ficha_sinuca" ? "Ficha de sinuca: venda por quantidade, sem controle de estoque." : `Estoque: ${numero(selecionado.quantidade_produto)} unidade(s) · Já no pedido: ${numero(jaNoPedido)}.`}</p>}
                     </div>
                     <div className="venda-campos">

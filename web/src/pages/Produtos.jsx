@@ -6,7 +6,7 @@ import "../dashboard.css";
 import "../produtos.css";
 
 const tipos = { bebida_alcoolica: "Bebida alcoólica", bebida_nao_alcoolica: "Bebida não alcoólica", guloseima: "Guloseima", ficha_sinuca: "Ficha de sinuca" };
-const vazio = { nome_produto: "", tipo_produto: "bebida_alcoolica", valor_unitario: "", quantidade_produto: "0" };
+const vazio = { nome_produto: "", tipo_produto: "bebida_alcoolica", valor_unitario: "" };
 
 export default function Produtos() {
     const { usuario, consultar } = useAuth();
@@ -45,7 +45,7 @@ export default function Produtos() {
         try {
             const produto = await consultar(`/produtos/${id}`);
             setOriginal(produto);
-            setForm({ ...produto, valor_unitario: produto.valor_unitario.replace(".", ","), quantidade_produto: String(produto.quantidade_produto) });
+            setForm({ ...produto, valor_unitario: produto.valor_unitario.replace(".", ",") });
         } catch (erro) { setErro(erro.message); }
         finally { terminar(); }
     }
@@ -57,14 +57,12 @@ export default function Produtos() {
             const valor = form.valor_unitario.trim().replace(",", ".");
             if (!/^\d{1,10}(\.\d{1,2})?$/.test(valor)) throw new Error("Informe um preço válido, como 9,50, sem separador de milhar.");
             const ficha = form.tipo_produto === "ficha_sinuca";
-            if (!ficha && (!/^\d+$/.test(form.quantidade_produto) || Number(form.quantidade_produto) > 2147483647)) throw new Error("Informe uma quantidade inteira entre 0 e 2147483647.");
             if (!form.nome_produto.trim()) throw new Error("Informe o nome do produto.");
-            const dados = { nome_produto: form.nome_produto.trim(), tipo_produto: form.tipo_produto, valor_unitario: valor, quantidade_produto: ficha ? 0 : Number(form.quantidade_produto) };
+            const dados = { nome_produto: form.nome_produto.trim(), tipo_produto: form.tipo_produto, valor_unitario: valor };
             if (original) {
-                // A edicao de nome/preco nao deve enviar um saldo antigo ao servidor.
                 for (const campo of Object.keys(dados)) {
                     const igual = campo === "valor_unitario" ? Number(dados[campo]) === Number(original[campo]) : dados[campo] === original[campo];
-                    if (igual || (campo === "quantidade_produto" && ficha)) delete dados[campo];
+                    if (igual) delete dados[campo];
                 }
                 if (!Object.keys(dados).length) { setMensagem("Nenhuma alteração para salvar."); return; }
             }
@@ -102,7 +100,9 @@ export default function Produtos() {
                 <div className="campo"><label htmlFor="tipo-produto">Tipo do produto</label><select id="tipo-produto" value={form.tipo_produto} onChange={e => mudar("tipo_produto", e.target.value)}>{!tipos[form.tipo_produto] && <option value={form.tipo_produto}>Selecione um tipo válido</option>}{Object.entries(tipos).map(([valor, texto]) => <option key={valor} value={valor}>{texto}</option>)}</select></div>
                 <div className="campo"><label htmlFor="nome-produto">Nome do produto</label><input ref={nomeInput} id="nome-produto" value={form.nome_produto} onChange={e => mudar("nome_produto",e.target.value)} maxLength={150} required placeholder="Ex.: Heineken 600ml" /></div>
                 <div className="campo"><label htmlFor="preco-produto">Valor unitário (R$)</label><input id="preco-produto" inputMode="decimal" value={form.valor_unitario} onChange={e => mudar("valor_unitario",e.target.value)} required placeholder="9,50" /></div>
-                {form.tipo_produto === "ficha_sinuca" ? <p className="aviso-ficha">Fichas não possuem controle de estoque. A quantidade é definida automaticamente como zero.{original && original.tipo_produto !== "ficha_sinuca" && " Ao salvar, o saldo atual será zerado."}</p> : <div className="campo"><label htmlFor="quantidade-produto">{original ? "Saldo atual" : "Quantidade inicial"}</label><input id="quantidade-produto" type="number" min="0" max="2147483647" step="1" required value={form.quantidade_produto} onChange={e => mudar("quantidade_produto",e.target.value)} /><p className="aviso-ficha">Compras devem ser registradas em Estoque. Este campo define o saldo diretamente.</p></div>}
+                {form.tipo_produto === "ficha_sinuca"
+                    ? <p className="aviso-ficha">Fichas não possuem controle de estoque e são definidas automaticamente com quantidade zero.{original && original.tipo_produto !== "ficha_sinuca" && " Ao salvar, o saldo atual será zerado."}</p>
+                    : <p className="aviso-ficha">{original ? `Saldo atual: ${numero(original.quantidade_produto)} unidade(s). Para alterar o estoque, registre uma entrada na tela Estoque.` : "O produto será cadastrado com estoque zero. Para adicionar unidades, registre uma entrada na tela Estoque."}</p>}
                 {erro && <p className="mensagem erro" role="alert">{erro}</p>}
                 <button className="botao-primario">{ocupado ? "Aguarde…" : original ? "Salvar alterações" : "Salvar produto"}</button>
                 {original && <button className="cancelar-edicao" type="button" onClick={limpar}>Cancelar edição</button>}
