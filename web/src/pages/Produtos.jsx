@@ -8,11 +8,42 @@ import "../produtos.css";
 const tipos = { bebida_alcoolica: "Bebida alcoólica", bebida_nao_alcoolica: "Bebida não alcoólica", guloseima: "Guloseima", ficha_sinuca: "Ficha de sinuca" };
 const vazio = { nome_produto: "", tipo_produto: "bebida_alcoolica", valor_unitario: "" };
 
+const ordenacoes = [
+    ["nome:asc", "Nome (A–Z)"],
+    ["nome:desc", "Nome (Z–A)"],
+    ["custo:asc", "Custo unitário (menor primeiro)"],
+    ["custo:desc", "Custo unitário (maior primeiro)"],
+    ["estoque:asc", "Estoque (menor primeiro)"],
+    ["estoque:desc", "Estoque (maior primeiro)"],
+];
+const compararNomes = new Intl.Collator("pt-BR", { sensitivity: "base" }).compare;
+
+function ordenarProdutos(produtos, ordenacao) {
+    const [campo, ordem] = ordenacao.split(":");
+    const direcao = ordem === "desc" ? -1 : 1;
+    return [...produtos].sort((a, b) => {
+        const porNome = compararNomes(a.nome_produto, b.nome_produto);
+        let diferenca;
+        if (campo === "estoque") {
+            // Fichas ficam após os produtos físicos nos dois sentidos da ordenação.
+            const porEstoqueAplicavel = Number(a.tipo_produto === "ficha_sinuca") - Number(b.tipo_produto === "ficha_sinuca");
+            if (porEstoqueAplicavel) return porEstoqueAplicavel;
+            diferenca = a.quantidade_produto - b.quantidade_produto;
+        } else if (campo === "custo") {
+            diferenca = Number(a.valor_unitario) - Number(b.valor_unitario);
+        } else {
+            diferenca = porNome;
+        }
+        return direcao * diferenca || porNome || a.id_produto - b.id_produto;
+    });
+}
+
 export default function Produtos() {
     const { usuario, consultar } = useAuth();
     const administrador = usuario.tipo_acesso === "administrador";
     const [busca, setBusca] = useState("");
     const [filtros, setFiltros] = useState({ nome: "", tipo: "" });
+    const [ordenacao, setOrdenacao] = useState("nome:asc");
     const [produtos, setProdutos] = useState(null);
     const [erroLista, setErroLista] = useState("");
     const [revisao, setRevisao] = useState(0);
@@ -92,8 +123,14 @@ export default function Produtos() {
             <section aria-label="Lista de produtos">
                 <form className="busca-produtos" onSubmit={e => { e.preventDefault(); setFiltros(atual => ({ ...atual, nome: busca.trim() })); }}><label className="campo-busca">Buscar por nome<input type="search" maxLength={150} value={busca} onChange={e => setBusca(e.target.value)} placeholder="Nome do produto" /></label><button className="atualizar">Buscar</button><button className="atualizar" type="button" onClick={() => { setBusca(""); setFiltros({ nome: "", tipo: "" }); }}>Limpar</button></form>
                 <div className="filtros-tipo" role="group" aria-label="Filtrar por tipo">{Object.entries({ "": "Todos", ...tipos }).map(([valor, texto]) => <button key={valor} aria-pressed={filtros.tipo === valor} onClick={() => setFiltros(atual => ({ ...atual, tipo: valor }))}>{texto}</button>)}</div>
+                <div className="ordenacao-produtos">
+                    <label htmlFor="ordenacao-produtos">Ordenar por</label>
+                    <select id="ordenacao-produtos" value={ordenacao} onChange={evento => setOrdenacao(evento.target.value)}>
+                        {ordenacoes.map(([valor, rotulo]) => <option key={valor} value={valor}>{rotulo}</option>)}
+                    </select>
+                </div>
                 <div className="bloco">
-                    {erroLista ? <div className="estado-vazio" role="alert"><p>{erroLista}</p><button className="atualizar" onClick={() => setRevisao(n => n + 1)}>Tentar novamente</button></div> : !produtos ? <p className="estado-vazio" role="status">Carregando produtos…</p> : !produtos.length ? <div className="estado-vazio"><h2>Nenhum produto encontrado</h2><p>{filtros.nome || filtros.tipo ? "Ajuste os filtros para buscar outros produtos." : "Os produtos cadastrados aparecerão aqui."}</p></div> : <div className="tabela-container" role="region" aria-label="Produtos cadastrados" tabIndex="0"><table><thead><tr><th scope="col">Produto</th><th scope="col">Tipo</th><th scope="col">Estoque</th><th scope="col">Custo unitário</th>{administrador && <th scope="col">Ações</th>}</tr></thead><tbody>{produtos.map(produto => <tr key={produto.id_produto}><td><strong>{produto.nome_produto}</strong></td><td>{tipos[produto.tipo_produto] || produto.tipo_produto}</td><td>{produto.tipo_produto === "ficha_sinuca" ? "Não se aplica" : numero(produto.quantidade_produto)}</td><td className="numerico">{dinheiro(produto.valor_unitario)}</td>{administrador && <td><div className="acoes-produto"><button disabled={ocupado} onClick={() => editar(produto.id_produto)} aria-label={`Editar ${produto.nome_produto}`}>Editar</button><button disabled={ocupado} onClick={() => pedirExclusao(produto)} aria-label={`Excluir ${produto.nome_produto}`}>Excluir</button></div></td>}</tr>)}</tbody></table></div>}
+                    {erroLista ? <div className="estado-vazio" role="alert"><p>{erroLista}</p><button className="atualizar" onClick={() => setRevisao(n => n + 1)}>Tentar novamente</button></div> : !produtos ? <p className="estado-vazio" role="status">Carregando produtos…</p> : !produtos.length ? <div className="estado-vazio"><h2>Nenhum produto encontrado</h2><p>{filtros.nome || filtros.tipo ? "Ajuste os filtros para buscar outros produtos." : "Os produtos cadastrados aparecerão aqui."}</p></div> : <div className="tabela-container" role="region" aria-label="Produtos cadastrados" tabIndex="0"><table><thead><tr><th scope="col">Produto</th><th scope="col">Tipo</th><th scope="col">Estoque</th><th scope="col">Custo unitário</th>{administrador && <th scope="col">Ações</th>}</tr></thead><tbody>{ordenarProdutos(produtos, ordenacao).map(produto => <tr key={produto.id_produto}><td><strong>{produto.nome_produto}</strong></td><td>{tipos[produto.tipo_produto] || produto.tipo_produto}</td><td>{produto.tipo_produto === "ficha_sinuca" ? "Não se aplica" : numero(produto.quantidade_produto)}</td><td className="numerico">{dinheiro(produto.valor_unitario)}</td>{administrador && <td><div className="acoes-produto"><button disabled={ocupado} onClick={() => editar(produto.id_produto)} aria-label={`Editar ${produto.nome_produto}`}>Editar</button><button disabled={ocupado} onClick={() => pedirExclusao(produto)} aria-label={`Excluir ${produto.nome_produto}`}>Excluir</button></div></td>}</tr>)}</tbody></table></div>}
                 </div>
             </section>
             {administrador && <section className="produto-editor" aria-labelledby="titulo-editor"><h2 id="titulo-editor">{original ? "Editar produto" : "Novo produto"}</h2><form onSubmit={salvar} aria-busy={ocupado}><fieldset disabled={ocupado}>

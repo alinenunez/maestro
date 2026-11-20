@@ -6,6 +6,9 @@
 .filtros-tipo { display:flex; gap:7px; flex-wrap:wrap; margin:17px 0; }
 .filtros-tipo button { border:1px solid #d0d3e4; border-radius:20px; padding:7px 12px; background:white; color:#43486b; font-size:11px; }
 .filtros-tipo button[aria-pressed=true] { background:#28246d; color:white; border-color:#28246d; }
+.ordenacao-produtos { display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+.ordenacao-produtos label { font-size:12px; font-weight:600; color:#43486b; }
+.ordenacao-produtos select { min-height:40px; max-width:100%; padding:8px 10px; border:1px solid #c3c6db; border-radius:8px; background:white; color:#171a40; font:inherit; font-size:12px; }
 .produto-editor { padding:28px; border-radius:14px; background:linear-gradient(120deg,#12112f,#3530a9); color:white; box-shadow:6px 7px 0 #d0d7ee; }
 .produto-editor h2 { font-size:34px; }
 .produto-editor fieldset { margin:0; border:0; padding:0; min-width:0; }
