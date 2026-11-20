@@ -31,3 +31,11 @@ O status atual e a disponibilidade para o período são apresentados separadamen
 Cancelar reserva abre confirmação com cliente e número da reserva. Confirmar usa DELETE /reservas/:id e aceita o retorno 204. Conforme o modelo existente, a reserva e seus vínculos são excluídos sem histórico de cancelamento; as mesas permanecem cadastradas. A operação não cancela vendas nem altera a situação física da mesa.
 
 A tela possui carregamento, listas vazias, mensagens de erro e novas tentativas. Consultas desatualizadas são canceladas para evitar resultados de horários anteriores. Não foram adicionadas restrições de duração de uma noite, datas passadas ou horário comercial além das regras já existentes. Testes automatizados continuam adiados conforme combinado.
+
+## Gerenciamento de mesas
+
+Em Reservas, o administrador pode abrir Gerenciar mesas no bloco Situação atual do salão. É possível cadastrar número e situação inicial, alterar somente o número e excluir com confirmação. Usa as rotas existentes POST /mesas, PATCH /mesas/:id e DELETE /mesas/:id. O funcionário continua apenas consultando e alterando a situação atual.
+
+O número deve ser inteiro positivo até 2147483647 e não pode repetir outro cadastro. A API confirma a unicidade e impede exclusão de mesas com reservas vinculadas. Não se excluem reservas automaticamente. Renumerar mantém o ID e os vínculos das reservas. A situação atual é alterada pelos controles já existentes do salão.
+
+Após uma alteração, a lista e a agenda são atualizadas e a consulta de disponibilidade anterior é invalidada. Durante o envio os controles de gerenciamento e situação ficam bloqueados. Se a gravação não puder ser confirmada, a tela exige conferir a lista antes de iniciar outra operação. Não houve mudança no banco ou no backend.

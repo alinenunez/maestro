@@ -65,3 +65,11 @@ Despesas está disponível em /despesas somente para administradores: GET/POST /
 Relatórios financeiros estão disponíveis em /relatorios para administradores, com período, resumo e detalhamento de vendas, compras e despesas. Consulte relatorios.md.
 
 Funcionários está disponível em /funcionarios para administradores: busca, filtro de situação, cadastro, consulta, edição e inativação/reativação. Consulte funcionarios-web.md.
+
+## Gerenciamento de mesas
+
+Em Reservas, o administrador pode abrir Gerenciar mesas no bloco Situação atual do salão. É possível cadastrar número e situação inicial, alterar somente o número e excluir com confirmação. Usa as rotas existentes POST /mesas, PATCH /mesas/:id e DELETE /mesas/:id. O funcionário continua apenas consultando e alterando a situação atual.
+
+O número deve ser inteiro positivo até 2147483647 e não pode repetir outro cadastro. A API confirma a unicidade e impede exclusão de mesas com reservas vinculadas. Não se excluem reservas automaticamente. Renumerar mantém o ID e os vínculos das reservas. A situação atual é alterada pelos controles já existentes do salão.
+
+Após uma alteração, a lista e a agenda são atualizadas e a consulta de disponibilidade anterior é invalidada. Durante o envio os controles de gerenciamento e situação ficam bloqueados. Se a gravação não puder ser confirmada, a tela exige conferir a lista antes de iniciar outra operação. Não houve mudança no banco ou no backend.

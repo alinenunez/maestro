@@ -46,3 +46,11 @@
 .reserva-incerta button { white-space:normal; }
 @media(max-width:1150px) { .reservas-layout { grid-template-columns:1fr 1fr; } .reserva-editor { grid-column:1 / -1; max-width:650px; width:100%; } }
 @media(max-width:700px) { .reservas-layout { grid-template-columns:1fr; } .reserva-editor { grid-column:auto; } .reservas-pagina .painel-titulo { flex-wrap:wrap; } .lista-reservas { max-height:500px; } }
+
+.gerenciar-mesas { border-top:1px solid #ffffff40; margin-top:24px; padding-top:20px; }
+.gerenciar-mesas h3 { font-size:25px; margin-top:22px; }
+.gerenciar-mesas fieldset { min-width:0; border:0; padding:0; margin:0; }
+.gerenciar-mesas .campo label { font-size:12px; }
+.gerenciar-mesas input { min-width:0; }
+.gerenciar-mesas .atualizar { white-space:normal; }
+.mesa-excluir { width:100%; border:1px solid #f3bbc5; border-radius:9px; background:#fbe3e7; color:#7c2337; padding:12px; margin-top:14px; }
