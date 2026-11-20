@@ -16,7 +16,7 @@ Não copie o .env do servidor para web. Senha do banco, chave JWT e credenciais 
 
 - src/main.jsx: inicia React, navegação e contexto de autenticação.
 - src/App.jsx: rotas, proteção das páginas e títulos.
-- src/pages: Login, RecuperarSenha, RedefinirSenha, Dashboard, Produtos, Estoque, Vendas, Reservas, Despesas e Relatórios.
+- src/pages: Login, RecuperarSenha, RedefinirSenha, Dashboard, Produtos, Estoque, Vendas, Reservas, Despesas, Relatórios e Funcionários.
 - src/components: apresentação compartilhada e campo de senha com botão mostrar/ocultar.
 - src/contexts/AuthContext.jsx: usuário, token em memória, expiração, login e saída.
 - src/services/api.js: chamadas fetch, erros, cancelamento e tempo limite de 15 segundos.
@@ -63,3 +63,5 @@ Reservas também está habilitado no menu dos dois perfis, compartilhando o cabe
 Despesas está disponível em /despesas somente para administradores: GET/POST /despesas, histórico e total listado. Consulte despesas-web.md.
 
 Relatórios financeiros estão disponíveis em /relatorios para administradores, com período, resumo e detalhamento de vendas, compras e despesas. Consulte relatorios.md.
+
+Funcionários está disponível em /funcionarios para administradores: busca, filtro de situação, cadastro, consulta, edição e inativação/reativação. Consulte funcionarios-web.md.

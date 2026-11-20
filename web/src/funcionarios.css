@@ -1,0 +1,19 @@
+.funcionarios-filtros { display:flex; flex-wrap:wrap; gap:18px; align-items:end; margin:26px 0; }
+.funcionarios-filtros .campo { margin:0; flex:1; min-width:180px; }
+.funcionarios-filtros select,.funcionario-editor select { width:100%; min-height:50px; padding:10px; border-radius:10px; border:1px solid #c3c6db; background:white; color:#171a40; font:inherit; }
+.funcionarios-filtros select:focus-visible,.funcionario-editor select:focus-visible { outline:3px solid #bb8a19; outline-offset:2px; }
+.funcionarios-tabela table { min-width:720px; }
+.funcionarios-tabela td { overflow-wrap:anywhere; }
+.funcionarios-tabela .funcionario-cpf { white-space:nowrap; }
+.funcionario-editor { padding:28px; margin-top:28px; border-radius:14px; background:linear-gradient(120deg,#12112f,#3530a9); color:white; box-shadow:6px 7px 0 #d0d7ee; scroll-margin-top:20px; }
+.funcionario-editor h2 { font-size:34px; }
+.funcionario-editor fieldset { border:0; margin:0; padding:0; min-width:0; }
+.funcionario-campos { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 24px; }
+.funcionario-campos input { min-width:0; }
+.funcionario-editor .campo label { font-size:12px; }
+.funcionario-trocar { display:flex; align-items:center; gap:10px; margin:22px 0; font-size:13px; }
+.funcionario-trocar input { width:18px; height:18px; }
+.funcionario-nota { font-size:11px; color:#dbd9f1; line-height:1.7; margin:20px 0; }
+.funcionario-editor .botao-primario { max-width:360px; }
+.funcionario-editor > .atualizar { margin-top:16px; }
+@media(max-width:650px) { .funcionario-campos { grid-template-columns:1fr; } .funcionario-editor { padding:22px; } }

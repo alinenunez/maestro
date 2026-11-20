@@ -243,7 +243,7 @@ Na raiz do projeto, instale as dependências da interface com `npm --prefix web 
 Mantenha dois terminais abertos: `npm run dev` para a API e `npm run dev:web` para o React.
 Abra http://localhost:5173. Entre com uma conta já cadastrada no banco.
 
-O frontend inclui login, solicitação de recuperação, nova senha pelo link do email e um dashboard protegido com os indicadores do bar, os dados básicos do usuário e saída. Dashboard, Produtos, Estoque, Vendas, Reservas, Despesas e Relatórios estão implementados; as telas dos demais módulos continuam para as próximas etapas. Não são exibidos dados fictícios na aplicação.
+O frontend inclui login, solicitação de recuperação, nova senha pelo link do email e um dashboard protegido com os indicadores do bar, os dados básicos do usuário e saída. Dashboard, Produtos, Estoque, Vendas, Reservas, Despesas, Relatórios e Funcionários estão implementados; as telas dos demais módulos continuam para as próximas etapas. Não são exibidos dados fictícios na aplicação.
 
 Consulte [o guia do frontend](docs/frontend.md) para estrutura, configuração e limites desta etapa. `npm run build:web` gera a interface em `web/dist`, ignorada pelo Git.
 
@@ -260,3 +260,5 @@ A tela de [reservas](docs/reservas-web.md), em /reservas, permite consultar disp
 A tela de [despesas](docs/despesas-web.md), em /despesas, permite ao administrador registrar pagamentos e consultar o histórico com o total listado.
 
 Relatórios financeiros estão disponíveis em /relatorios para administradores, com período, resumo e detalhamento de vendas, compras e despesas. Consulte [o guia](docs/relatorios.md).
+
+Funcionários está disponível em /funcionarios para administradores: busca, filtro de situação, cadastro, consulta, edição e inativação/reativação. Consulte [o guia](docs/funcionarios-web.md).

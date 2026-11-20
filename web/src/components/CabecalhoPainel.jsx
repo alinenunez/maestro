@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 import { Marca } from "./AuthLayout";
 import { useAuth } from "../contexts/AuthContext";
 const opcoes = [
-    { nome: "Funcionários", administrador: true }, { nome: "Produtos", caminho: "/produtos" },
+    { nome: "Funcionários", caminho: "/funcionarios", administrador: true }, { nome: "Produtos", caminho: "/produtos" },
     { nome: "Estoque", caminho: "/estoque" }, { nome: "Vendas", caminho: "/vendas" }, { nome: "Despesas", caminho: "/despesas", administrador: true },
     { nome: "Relatórios", caminho: "/relatorios", administrador: true }, { nome: "Reservas de mesas", caminho: "/reservas" },
 ];
