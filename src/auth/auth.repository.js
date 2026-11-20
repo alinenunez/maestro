@@ -1,6 +1,5 @@
 const { Op, fn, col, where } = require("sequelize");
 const Usuario = require("../database/models/usuario.model");
-const connection = require("../database/connection");
 
 // O hash fica restrito a autenticacao, validacao de sessoes e recuperacao de senha.
 function buscarCredenciaisPorEmail(email) {
@@ -21,19 +20,8 @@ function buscarUsuarioAtivoPorId(id) {
     });
 }
 
-async function criarAdministradorInicial(dados) {
-    return connection.transaction(async transaction => {
-        // Impede que dois cadastros iniciais passem juntos pela verificacao.
-        // Nao altera a estrutura nem os registros existentes.
-        await connection.query('LOCK TABLE "usuario" IN SHARE ROW EXCLUSIVE MODE', { transaction });
-        const existente = await Usuario.findOne({
-            attributes: ["id_usuario"],
-            where: { tipo_acesso: "administrador" },
-            transaction,
-        });
-        if (existente) return null;
-        return Usuario.create(dados, { transaction });
-    });
+function criarAdministrador(dados) {
+    return Usuario.create(dados);
 }
 
 async function atualizarSenhaPorRecuperacao(usuario, senhaHash) {
@@ -49,4 +37,4 @@ async function atualizarSenhaPorRecuperacao(usuario, senhaHash) {
     return alterados === 1;
 }
 
-module.exports = { buscarCredenciaisPorEmail, buscarUsuarioAtivoPorId, criarAdministradorInicial, atualizarSenhaPorRecuperacao };
+module.exports = { buscarCredenciaisPorEmail, buscarUsuarioAtivoPorId, criarAdministrador, atualizarSenhaPorRecuperacao };

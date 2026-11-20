@@ -44,7 +44,7 @@ export default function CadastroInicial() {
         if (!chave.trim()) { setErro("Informe a chave de cadastro inicial fornecida pelo responsável pela configuração."); return; }
         trava.current = true; setEnviando(true);
         try {
-            // A API define o perfil de administrador e a situação ativa; não há seletor de perfil.
+            // A API sempre define o perfil de administrador e a situação ativa.
             await requisicao("/auth/cadastro-inicial", { metodo: "POST", dados, chaveCadastro: chave });
             setChave(""); setForm(atual => ({ ...atual, senha: "", confirmacao_senha: "" }));
             navigate("/login", { replace: true, state: { mensagem: "Administrador cadastrado com sucesso. Entre com seu e-mail e senha." } });
@@ -56,9 +56,9 @@ export default function CadastroInicial() {
         } finally { trava.current = false; setEnviando(false); }
     }
     return <div className="cadastro-inicial"><AuthLayout>
-        <span className="sobretitulo card-sobretitulo">PRIMEIRO ACESSO</span>
+        <span className="sobretitulo card-sobretitulo">ACESSO ADMINISTRATIVO</span>
         <h1 id="titulo-formulario">Cadastrar administrador</h1>
-        <p className="card-descricao">Crie a primeira conta para configurar e gerenciar o Maestro. Se o sistema já possui administrador, utilize o login.</p>
+        <p className="card-descricao">Cadastre uma conta de administrador para acessar e gerenciar o Maestro.</p>
         <form onSubmit={cadastrar} aria-busy={enviando}><fieldset disabled={enviando || incerto}>
             <div className="cadastro-inicial-campos">
                 {campos.map(c => <div className="campo" key={c.nome}><label htmlFor={`inicial-${c.nome}`}>{c.label}</label><input id={`inicial-${c.nome}`} name={c.nome} autoComplete={c.autoComplete} type={c.tipo || "text"} maxLength={c.limite} min={c.tipo === "date" ? "0001-01-01" : undefined} max={c.tipo === "date" ? "9999-12-31" : undefined} required value={form[c.nome]} onChange={e => mudar(c.nome, e.target.value)} /></div>)}
@@ -66,8 +66,8 @@ export default function CadastroInicial() {
                 <CampoSenha id="inicial-senha" label="Senha" autoComplete="new-password" value={form.senha} onChange={e => mudar("senha", e.target.value)} />
                 <CampoSenha id="inicial-confirmacao" label="Confirmação de senha" autoComplete="new-password" value={form.confirmacao_senha} onChange={e => mudar("confirmacao_senha", e.target.value)} />
             </div>
-            <CampoSenha id="inicial-chave" label="Chave de cadastro inicial" autoComplete="off" value={chave} onChange={e => setChave(e.target.value)} aria-describedby="ajuda-chave-inicial" />
-            <p id="ajuda-chave-inicial" className="cadastro-inicial-ajuda">Solicite a chave ao responsável pela configuração do sistema. Ela autoriza somente a criação do primeiro administrador.</p>
+            <CampoSenha id="inicial-chave" label="Chave de cadastro de administrador" autoComplete="off" value={chave} onChange={e => setChave(e.target.value)} aria-describedby="ajuda-chave-inicial" />
+            <p id="ajuda-chave-inicial" className="cadastro-inicial-ajuda">Solicite a chave ao responsável pelo sistema. Ela autoriza o cadastro de administradores; mantenha-a em sigilo.</p>
             <button className="botao-primario">{enviando ? "Cadastrando…" : "Cadastrar administrador"}</button>
         </fieldset></form>
         {erro && <p className="mensagem erro" role="alert">{erro}</p>}

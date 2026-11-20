@@ -44,7 +44,7 @@ Na redefinição, o token é lido do fragmento e removido do endereço; fica ape
 
 O envio real de emails depende das credenciais Gmail no .env do servidor. Mantenha RESET_PASSWORD_URL=http://localhost:5173/redefinir-senha para o desenvolvimento. Consulte recuperacao-senha.md.
 
-O cadastro inicial está disponível em /cadastro-inicial, pelo link Primeiro acesso no login. Exige a chave de configuração e continua bloqueado pela API após existir um administrador. Funcionários são cadastrados pelo administrador autenticado. Consulte docs/autenticacao.md.
+O cadastro de administradores está disponível em /cadastro-inicial pelo link na tela de login. Exige a chave de configuração e permite cadastrar mais de um administrador; a tela de Funcionários continua cadastrando somente funcionários. Consulte docs/autenticacao.md.
 
 ## Build e publicação
 

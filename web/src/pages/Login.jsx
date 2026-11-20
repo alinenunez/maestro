@@ -33,6 +33,6 @@ export default function Login() {
             <button className="botao-primario" disabled={enviando}>{enviando ? "Entrando…" : "Entrar"}<span aria-hidden="true">→</span></button>
         </form>
         <p className="card-rodape">Precisa de acesso? Fale com o administrador.</p>
-        <Link className="voltar voltar-secundario" to="/cadastro-inicial">Primeiro acesso? Cadastrar administrador</Link>
+        <Link className="voltar voltar-secundario" to="/cadastro-inicial">Cadastrar administrador</Link>
     </AuthLayout>;
 }

@@ -14,9 +14,9 @@ function consultarSessao(req, res) {
     res.set("Cache-Control", "no-store");
     return res.json({ usuario: service.usuarioDaSessao(req.user) });
 }
-async function cadastrarAdministradorInicial(req, res) {
+async function cadastrarAdministrador(req, res) {
     try {
-        const usuario = await service.cadastrarAdministradorInicial(req.body, req.get("X-Setup-Token"));
+        const usuario = await service.cadastrarAdministrador(req.body, req.get("X-Setup-Token"));
         return res.location(`/usuarios/${usuario.id_usuario}`).status(201).json(usuario);
     } catch (erro) { return responderErro(res, erro); }
 }
@@ -30,4 +30,4 @@ async function redefinirSenha(req, res) {
     try { return res.json(await service.redefinirSenha(req.body)); }
     catch (erro) { return responderErro(res, erro); }
 }
-module.exports = { login, consultarSessao, cadastrarAdministradorInicial, solicitarRecuperacao, redefinirSenha };
+module.exports = { login, consultarSessao, cadastrarAdministrador, solicitarRecuperacao, redefinirSenha };

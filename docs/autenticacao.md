@@ -7,17 +7,15 @@ A autenticação segue o template da aula: `auth.config.js`, `auth.routes.js`, `
 O `.env` precisa de duas chaves diferentes:
 
 - `JWT_SECRET`: chave aleatória, com pelo menos 32 caracteres, para assinar os tokens.
-- `ADMIN_SETUP_TOKEN`: chave local, com pelo menos 32 caracteres, que autoriza o primeiro cadastro de administrador. Pode ficar vazia para desabilitar esse cadastro.
+- `ADMIN_SETUP_TOKEN`: chave local, com pelo menos 32 caracteres, que autoriza o cadastro de administradores pela tela pública `/cadastro-inicial`. Pode ficar vazia para desabilitar novos cadastros.
 
 As duas foram geradas no `.env` local durante esta implementação. Seus valores não aparecem no `.env.example` e não devem ir para o Git. A senha do PostgreSQL foi preservada. Em outro computador, gere cada chave com `node -e "console.log(require('node:crypto').randomBytes(48).toString('base64url'))"` e preencha o `.env`. Reinicie o servidor após alterar esse arquivo.
 
 Inicie com `npm run dev`. O endpoint `/health` permanece público. As rotas de negócio exigem autenticação. As rotas públicas `/auth/recuperar-senha` e `/auth/redefinir-senha` atendem à recuperação por email e possuem limites de tentativas. Configure os dados SMTP no `.env` conforme o [guia de recuperação](recuperacao-senha.md).
 
-## Primeiro administrador
+## Cadastro de administradores
 
-Se já existe um administrador, use o login. A existência de um administrador inativo também encerra a possibilidade de cadastro inicial: inativar alguém não reabre o cadastro.
-
-Se não existe administrador, abra `/cadastro-inicial` pelo link Primeiro acesso na tela de login. Informe os dados e a chave local de configuração. Alternativamente, envie `POST /auth/cadastro-inicial` no Postman/Insomnia:
+Abra `/cadastro-inicial` pelo link na tela de login. Informe os dados e a chave local de configuração. O fluxo permite cadastrar mais de um administrador e não exige que já exista uma conta administrativa. Alternativamente, envie `POST /auth/cadastro-inicial` no Postman/Insomnia:
 
 - Cabeçalho `Content-Type`: `application/json`.
 - Cabeçalho `X-Setup-Token`: o valor de `ADMIN_SETUP_TOKEN` do seu `.env` local.
@@ -38,9 +36,9 @@ Se não existe administrador, abra `/cadastro-inicial` pelo link Primeiro acesso
 
 Os dados acima são fictícios; o servidor não cria essa conta automaticamente. Data de início e tipo de contratação continuam obrigatórios porque a estrutura do banco foi mantida.
 
-Sem a chave correta, retorna 403. Com administrador já existente, retorna 409. A verificação e a criação acontecem na mesma transação, bloqueando temporariamente escritas na tabela de usuários para impedir dois primeiros cadastros simultâneos. Nenhuma tabela é recriada.
+Sem a chave correta, retorna 403. Tentativas são limitadas por endereço IP. CPF e email duplicados retornam 409. Nenhuma tabela é recriada.
 
-Depois do cadastro, remova o valor de `ADMIN_SETUP_TOKEN` do `.env` e reinicie o servidor. A criação de funcionários passa a ocorrer em `POST /usuarios`, com token de administrador. Esse endpoint não aceita criar outro administrador. A edição também não permite promover funcionários alterando `tipo_acesso`.
+Mantenha `ADMIN_SETUP_TOKEN` somente no `.env` do servidor, use uma chave aleatória forte e compartilhe-a apenas com pessoas autorizadas a criar administradores. Remova ou esvazie a variável e reinicie o servidor para desabilitar novos cadastros pela tela. Funcionários continuam sendo criados em `POST /usuarios`, com token de administrador; esse endpoint não aceita criar administradores e a tela de Funcionários permanece restrita a funcionários.
 
 ## Login e sessão
 
@@ -101,10 +99,10 @@ Foram feitas verificação de sintaxe, carregamento das estratégias e conferên
 
 ## Tela do cadastro inicial
 
-A página React /cadastro-inicial usa o layout de autenticação. Reúne nome, CPF, e-mail, nascimento, início, contratação, senha, confirmação e chave de cadastro inicial. Data de início e contratação continuam obrigatórias no banco; não foi adicionado função/cargo. CPF recebe validação de formato, igual à API.
+A página React /cadastro-inicial usa o layout de autenticação. Reúne nome, CPF, e-mail, nascimento, início, contratação, senha, confirmação e chave de cadastro de administrador. Data de início e contratação continuam obrigatórias no banco; não foi adicionado função/cargo. CPF recebe validação de formato, igual à API.
 
-A chave é o valor de ADMIN_SETUP_TOKEN, preenchido manualmente pela pessoa responsável pela instalação. Não coloque essa variável no frontend nem em VITE_*. A interface envia a chave apenas no cabeçalho X-Setup-Token de POST /auth/cadastro-inicial; nunca na URL, corpo JSON ou armazenamento local. Senhas e chave ficam somente no estado da página, são descartadas ao sair e limpas após sucesso ou resposta inconclusiva. Nenhuma credencial foi alterada para implementar a tela.
+A chave é o valor de ADMIN_SETUP_TOKEN, preenchido manualmente pela pessoa responsável pela instalação. Não coloque essa variável no frontend nem em VITE_*. A interface envia a chave apenas no cabeçalho X-Setup-Token de POST /auth/cadastro-inicial; nunca na URL, corpo JSON ou armazenamento local. Senhas e chave ficam somente no estado da página, são descartadas ao sair e limpas após sucesso ou resposta inconclusiva.
 
-O backend continua definindo perfil administrador e situação ativa, validando a chave e impedindo um segundo cadastro, inclusive se o administrador existente estiver inativo. A página não consulta publicamente a existência de contas: 403 e 409 são exibidos conforme a resposta da API. Quem já está autenticado é redirecionado ao dashboard.
+O backend define o perfil administrador e a situação ativa, valida a chave e limita tentativas de cadastro. A tela não consulta publicamente dados de contas; erros de validação são exibidos conforme a resposta da API. Quem já está autenticado é redirecionado ao dashboard.
 
 Após sucesso, a tela encaminha ao login com mensagem de confirmação, sem autenticação automática. Cliques repetidos ficam bloqueados durante o envio. Em falha de rede ou resposta 5xx, o formulário fica bloqueado e orienta tentar o login antes de iniciar outro cadastro, pois a criação pode ter ocorrido.

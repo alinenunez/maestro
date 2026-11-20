@@ -55,24 +55,22 @@ function gerarSessao(usuario) {
     return { token, tipo: "Bearer", expira_em: config.duracaoSegundos, usuario: usuarioDaSessao(usuario) };
 }
 
-function validarChaveCadastroInicial(chave) {
+function validarChaveCadastro(chave) {
     const configurada = process.env.ADMIN_SETUP_TOKEN;
-    if (!configurada || Buffer.byteLength(configurada, "utf8") < 32) throw falha("Cadastro inicial desabilitado.", 403);
-    if (typeof chave !== "string") throw falha("Chave de cadastro inicial invalida.", 403);
+    if (!configurada || Buffer.byteLength(configurada, "utf8") < 32) throw falha("Cadastro de administradores desabilitado.", 403);
+    if (typeof chave !== "string") throw falha("Chave de cadastro de administrador invalida.", 403);
     const recebida = Buffer.from(chave);
     const esperada = Buffer.from(configurada);
-    if (recebida.length !== esperada.length || !timingSafeEqual(recebida, esperada)) throw falha("Chave de cadastro inicial invalida.", 403);
+    if (recebida.length !== esperada.length || !timingSafeEqual(recebida, esperada)) throw falha("Chave de cadastro de administrador invalida.", 403);
 }
 
-async function cadastrarAdministradorInicial(dados, chave) {
-    validarChaveCadastroInicial(chave);
+async function cadastrarAdministrador(dados, chave) {
+    validarChaveCadastro(chave);
     if (!dados || typeof dados !== "object" || Array.isArray(dados)) throw falha("Envie os dados do administrador em um objeto JSON.");
-    if (Object.hasOwn(dados, "tipo_acesso") && dados.tipo_acesso !== "administrador") throw falha("O cadastro inicial e exclusivo do administrador.");
-    if (Object.hasOwn(dados, "situacao") && dados.situacao !== true) throw falha("O administrador inicial deve estar ativo.");
+    if (Object.hasOwn(dados, "tipo_acesso") && dados.tipo_acesso !== "administrador") throw falha("Este cadastro e exclusivo de administradores.");
+    if (Object.hasOwn(dados, "situacao") && dados.situacao !== true) throw falha("O administrador deve ser cadastrado ativo.");
     const preparados = await usuariosService.preparar({ ...dados, tipo_acesso: "administrador", situacao: true });
-    const usuario = await repository.criarAdministradorInicial(preparados);
-    if (!usuario) throw falha("O administrador ja foi cadastrado. Utilize o login.", 409);
-    return usuariosService.dadosPublicos(usuario);
+    return usuariosService.dadosPublicos(await repository.criarAdministrador(preparados));
 }
 
 
@@ -167,4 +165,4 @@ async function redefinirSenha(dados) {
     return { mensagem: "Senha redefinida com sucesso. Entre novamente no sistema." };
 }
 
-module.exports = { obterConfiguracaoJwt, validarLogin, usuarioDaSessao, autenticarUsuario, gerarSessao, cadastrarAdministradorInicial, versaoSessaoValida, solicitarRecuperacao, redefinirSenha };
+module.exports = { obterConfiguracaoJwt, validarLogin, usuarioDaSessao, autenticarUsuario, gerarSessao, cadastrarAdministrador, versaoSessaoValida, solicitarRecuperacao, redefinirSenha };

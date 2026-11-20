@@ -115,4 +115,12 @@ const limitarRedefinicaoSenha = rateLimit({
     message: { erro: "Muitas tentativas de redefinicao. Aguarde antes de tentar novamente." },
 });
 
-module.exports = { configureLocalStrategy, configureJwtStrategy, requireLocalAuth, requireJWTAuth, requirePermissao, verificarAlteracaoMesa, limitarSolicitacaoRecuperacao, limitarRecuperacaoPorEmail, limitarRedefinicaoSenha };
+const limitarCadastroAdministrador = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 10,
+    standardHeaders: "draft-8",
+    legacyHeaders: false,
+    message: { erro: "Muitas tentativas de cadastro de administrador. Aguarde antes de tentar novamente." },
+});
+
+module.exports = { configureLocalStrategy, configureJwtStrategy, requireLocalAuth, requireJWTAuth, requirePermissao, verificarAlteracaoMesa, limitarSolicitacaoRecuperacao, limitarRecuperacaoPorEmail, limitarRedefinicaoSenha, limitarCadastroAdministrador };
