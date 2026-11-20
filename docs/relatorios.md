@@ -67,7 +67,7 @@ Compras registradas em `controle_estoque` não devem ser cadastradas novamente c
 - `403`: usuário autenticado sem perfil de administrador.
 - `500`: falha no cálculo ou consulta, sem expor detalhes internos. A autenticação mantém `503` se não conseguir consultar o banco.
 
-Esta entrega inclui resumo e detalhamento dos lançamentos por período. Gráficos, agrupamentos adicionais e exportações não fazem parte desta etapa. O backend do dashboard está disponível separadamente em /dashboard, com a noite operacional das 19h às 5h; consulte [o guia do dashboard](dashboard.md).
+Esta entrega inclui resumo e detalhamento dos lançamentos por período. O frontend também oferece gráfico por faixas de datas, impressão e exportação CSV usando o detalhamento. O backend do dashboard está disponível separadamente em /dashboard, com a noite operacional das 19h às 5h; consulte [o guia do dashboard](dashboard.md).
 
 Foram conferidos sintaxe, carregamento da aplicação e execução da consulta de leitura no PostgreSQL. Nenhum lançamento foi criado, alterado ou removido. Os testes automatizados continuam adiados; os cenários completos de valores, limites de datas e permissões ainda precisam de validação funcional.
 
@@ -127,4 +127,14 @@ O resumo mostra receita, custos, resultado (inclusive prejuízo) e DRE simplific
 
 Alterar datas não muda o período exibido até clicar em Consultar período. A tela identifica o período efetivamente consultado. Novas consultas removem os dados anteriores durante o carregamento; falhas exibem erro com nova tentativa, nunca totais zero. A consulta é cancelada ao sair da página. Funcionários são redirecionados antes de carregar o conteúdo; a autorização da API permanece obrigatória.
 
-Esta etapa inclui consulta, resumo e tabelas responsivas. Gráficos semanais, impressão e exportação do protótipo ficam para uma etapa posterior. Não houve alteração no backend ou no banco.
+A interface inclui consulta, resumo, tabelas responsivas, gráfico, impressão e exportação CSV. Não houve alteração no backend ou no banco.
+
+## Gráfico, impressão e CSV
+
+O gráfico soma vendas pelo dia de São Paulo, compras pela data da compra e despesas pela data de pagamento, usando centavos BigInt. As faixas começam na data inicial e incluem sete dias; para períodos acima de 84 dias, usam múltiplos de sete para manter até 12 faixas. Faixas vazias mostram zero; a última termina exatamente na data final. As proporções são apenas visuais e os valores completos aparecem ao lado das barras.
+
+Imprimir / salvar PDF abre a impressão do navegador; o usuário escolhe impressora ou Salvar como PDF. O estilo de impressão retira navegação e filtros, preserva o período, resumo, gráfico e todos os lançamentos, retirando a altura máxima das tabelas.
+
+Exportar CSV baixa um arquivo UTF-8 com BOM, separado por ponto e vírgula, com período, linhas de resumo e todos os lançamentos. Valores usam vírgula decimal. A coluna Categoria diferencia os totais do resumo dos lançamentos, evitando confundi-los ao analisar a planilha. Textos de cadastros que poderiam ser interpretados como fórmulas recebem apóstrofo de proteção. Aspas e quebras de linha são escapadas. Nomes de produtos e responsáveis são incluídos; CPF, e-mail e credenciais não são exportados.
+
+As duas ações usam a mesma resposta exibida, sem nova consulta ao servidor. Ficam indisponíveis durante carregamento, erro ou alteração de datas ainda não aplicada. Nenhuma biblioteca, tabela ou rota foi adicionada para esta etapa.

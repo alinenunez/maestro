@@ -20,3 +20,38 @@
 @media(max-width:800px) { .relatorio-indicadores { grid-template-columns:1fr; } .relatorio-indicadores strong { font-size:36px; } }
 @media(max-width:450px) { .relatorio-filtro { padding:18px; } .relatorio-filtro .botao-primario { width:100%; } .relatorio-resumo dl > div { flex-direction:column; gap:8px; } .relatorio-resumo dd { text-align:left; } }
 .relatorio-tabela table { min-width:600px; }
+
+.relatorio-acoes { display:flex; flex-wrap:wrap; gap:12px; margin-top:22px; }
+.relatorio-acoes button:disabled { opacity:.5; cursor:not-allowed; }
+.grafico-financeiro { margin-top:24px; }
+.grafico-legenda { font-size:11px; margin:0 24px 20px; color:#61667d; }
+.grafico-financeiro ul { list-style:none; margin:0; padding:0 24px 24px; display:grid; gap:22px; }
+.grafico-financeiro h3 { font-family:Inter,Arial,sans-serif; font-size:12px; margin-bottom:12px; }
+.grafico-linha { display:grid; grid-template-columns:60px minmax(20px,1fr) minmax(110px,auto); align-items:center; gap:12px; font-size:11px; margin:8px 0; }
+.grafico-linha strong { text-align:right; overflow-wrap:anywhere; }
+.grafico-trilho { background:#f0f1f7; height:18px; border-radius:4px; overflow:hidden; }
+.grafico-trilho > div { height:100%; }
+.barra-entrada { background:#367b59; }
+.barra-saida { background:#b64b56; }
+@media(max-width:500px) { .grafico-linha { grid-template-columns:55px minmax(20px,1fr); } .grafico-linha strong { grid-column:2; } }
+@media print {
+    @page { size:A4; margin:14mm; }
+    body:has(.relatorio-pagina),.relatorio-pagina { background:white !important; color:#111; }
+    .relatorio-pagina .painel-header,.relatorio-pagina .relatorio-filtro,.relatorio-pagina .relatorio-acoes,.relatorio-pagina > main > .relatorio-nota,.relatorio-pagina .mensagem.erro { display:none !important; }
+    .relatorio-pagina .painel-conteudo { padding:0; max-width:none; }
+    .relatorio-pagina .painel-titulo h1 { font-size:30px; }
+    .relatorio-pagina .bloco,.relatorio-pagina .relatorio-indicadores { box-shadow:none; border:1px solid #777; border-radius:0; background:white; color:#111; }
+    .relatorio-pagina .relatorio-indicadores { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); }
+    .relatorio-pagina .relatorio-indicadores section { background:white; padding:12px; }
+    .relatorio-pagina .relatorio-indicadores strong { font-size:26px; }
+    .relatorio-pagina .relatorio-indicadores p { color:#333; }
+    .relatorio-pagina .tabela-container { max-height:none; overflow:visible; padding:0 12px 12px; }
+    .relatorio-pagina .relatorio-tabela table { min-width:0; table-layout:fixed; font-size:9px; }
+    .relatorio-pagina .tabela-container th,.relatorio-pagina .tabela-container td { padding:8px 5px; white-space:normal; overflow-wrap:anywhere; }
+    .relatorio-pagina thead { display:table-header-group; }
+    .relatorio-pagina tr,.relatorio-pagina .grafico-financeiro li,.relatorio-pagina .relatorio-resumo,.relatorio-pagina .relatorio-indicadores { break-inside:avoid; }
+    .relatorio-pagina .bloco-titulo { break-after:avoid; }
+    .relatorio-pagina .grafico-linha { grid-template-columns:55px minmax(20px,1fr) 120px; }
+    .relatorio-pagina .grafico-linha strong { grid-column:auto; }
+    .relatorio-pagina .grafico-trilho { print-color-adjust:exact; -webkit-print-color-adjust:exact; }
+}

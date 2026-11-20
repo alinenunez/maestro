@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
+import GraficoFinanceiro from "../components/GraficoFinanceiro";
+import { baixarRelatorio } from "../utils/relatorioExportacao";
 import CabecalhoPainel from "../components/CabecalhoPainel";
 import { useAuth } from "../contexts/AuthContext";
 import { dataNoite, dinheiro, numero } from "../utils/formatacao";
@@ -62,8 +64,12 @@ function ConteudoRelatorios() {
     const negativo = relatorio?.resultado_periodo.startsWith("-");
     const semMovimentos = relatorio && !relatorio.vendas.length && !relatorio.compras_estoque.length && !relatorio.despesas_operacionais.length;
 
-    return <div className="dashboard-layout"><CabecalhoPainel /><main className="painel-conteudo">
+    return <div className="dashboard-layout relatorio-pagina"><CabecalhoPainel /><main className="painel-conteudo">
         <div className="painel-titulo"><div><p className="sobretitulo">RECEITAS E CUSTOS</p><h1>Relatórios financeiros</h1><p>Resumo e detalhamento dos lançamentos do período.</p></div></div>
+        <div className="relatorio-acoes">
+            <button className="atualizar" disabled={!relatorio || carregando || pendente || Boolean(erro)} onClick={() => window.print()}>Imprimir / salvar PDF</button>
+            <button className="atualizar" disabled={!relatorio || carregando || pendente || Boolean(erro)} onClick={() => baixarRelatorio(relatorio)}>Exportar CSV</button>
+        </div>
         <form className="relatorio-filtro" onSubmit={aplicar}>
             <div className="campo"><label htmlFor="relatorio-inicio">Data inicial</label><input id="relatorio-inicio" type="date" min="0001-01-01" max="9999-12-31" required value={form.inicio} onChange={e => setForm(atual => ({ ...atual, inicio: e.target.value }))} /></div>
             <div className="campo"><label htmlFor="relatorio-fim">Data final</label><input id="relatorio-fim" type="date" min="0001-01-01" max="9999-12-31" required value={form.fim} onChange={e => setForm(atual => ({ ...atual, fim: e.target.value }))} /></div>
@@ -80,6 +86,7 @@ function ConteudoRelatorios() {
                 <section><h2>Custos totais</h2><strong>{dinheiro(relatorio.total_custos)}</strong><p>Compras de estoque + despesas operacionais.</p></section>
                 <section className={negativo ? "resultado-negativo" : "resultado-positivo"}><h2>{negativo ? "Prejuízo do período" : "Resultado do período"}</h2><strong>{dinheiro(relatorio.resultado_periodo)}</strong><p>Receitas menos custos totais.</p></section>
             </div>
+            <GraficoFinanceiro relatorio={relatorio} />
             <section className="bloco relatorio-resumo" aria-labelledby="dre-titulo"><div className="bloco-titulo"><h2 id="dre-titulo">DRE simplificado</h2></div><dl>
                 <div><dt>Receita de vendas</dt><dd>{dinheiro(relatorio.total_receitas)}</dd></div>
                 <div><dt>(−) Compras de estoque</dt><dd>{dinheiro(relatorio.total_compras_estoque)}</dd></div>
