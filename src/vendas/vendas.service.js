@@ -18,7 +18,7 @@ function validarObjeto(dados, campos, mensagem) {
         throw falha(mensagem);
     }
     if (Object.keys(dados).some(campo => !campos.includes(campo))) {
-        throw falha("O corpo possui campos nao permitidos. Precos, total e data sao definidos pelo servidor.");
+        throw falha("O corpo possui campos nao permitidos. Informe o valor unitario em cada item; total e data sao definidos pelo servidor.");
     }
 }
 
@@ -30,27 +30,32 @@ function preparar(dados) {
     }
     if (!Array.isArray(dados.itens) || !dados.itens.length) throw falha("A venda deve possuir pelo menos um item.");
 
-    const quantidades = new Map();
+    const agrupados = new Map();
     for (const item of dados.itens) {
-        validarObjeto(item, ["id_produto", "quantidade"], "Cada item deve ser um objeto com id_produto e quantidade.");
+        validarObjeto(item, ["id_produto", "quantidade", "valor_unitario"], "Cada item deve conter id_produto, quantidade e valor_unitario.");
         const idProduto = validarId(item.id_produto, "id_produto");
         if (!Number.isInteger(item.quantidade) || item.quantidade <= 0 || item.quantidade > limiteInteiro) {
             throw falha("quantidade deve ser um inteiro positivo valido.");
         }
-        const quantidade = (quantidades.get(idProduto) || 0) + item.quantidade;
+        const valorUnitario = emReais(emCentavos(item.valor_unitario));
+        const anterior = agrupados.get(idProduto);
+        if (anterior && anterior.valor_unitario !== valorUnitario) {
+            throw falha("Use o mesmo valor unitario para todas as unidades de um produto na venda.");
+        }
+        const quantidade = (anterior?.quantidade || 0) + item.quantidade;
         if (quantidade > limiteInteiro) throw falha("A quantidade acumulada do produto ultrapassa o limite permitido.");
-        quantidades.set(idProduto, quantidade);
+        agrupados.set(idProduto, { id_produto: idProduto, quantidade, valor_unitario: valorUnitario });
     }
     return {
         id_usuario: idUsuario,
         confirmacao_maior_idade: dados.confirmacao_maior_idade ?? false,
-        itens: Array.from(quantidades, ([id_produto, quantidade]) => ({ id_produto, quantidade })),
+        itens: Array.from(agrupados.values()),
     };
 }
 
 function emCentavos(valor) {
     if (!["string", "number"].includes(typeof valor) || !/^\d{1,10}(\.\d{1,2})?$/.test(String(valor))) {
-        throw falha("Um produto possui preco invalido. Corrija o cadastro antes de vender.", 409);
+        throw falha("valor_unitario do item deve ser nao negativo, com ate 10 digitos inteiros e 2 decimais. Use ponto decimal.");
     }
     const [inteiros, decimais = ""] = String(valor).split(".");
     return BigInt(inteiros) * 100n + BigInt(decimais.padEnd(2, "0"));
@@ -95,7 +100,8 @@ async function criar(dados) {
             }
 
             // Centavos inteiros evitam erros de precisao no calculo monetario.
-            const precoCentavos = emCentavos(produto.valor_unitario);
+            // O cadastro guarda o custo de compra; a venda usa o preço informado para o item.
+            const precoCentavos = emCentavos(item.valor_unitario);
             totalCentavos += precoCentavos * BigInt(item.quantidade);
             if (totalCentavos > limiteCentavos) throw falha("O total da venda ultrapassa o limite de valor permitido.");
             itens.push({ ...item, valor_unitario: emReais(precoCentavos) });

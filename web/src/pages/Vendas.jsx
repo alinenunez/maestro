@@ -18,6 +18,7 @@ export default function Vendas() {
     const [tipo, setTipo] = useState("");
     const [idProduto, setIdProduto] = useState("");
     const [quantidade, setQuantidade] = useState("1");
+    const [valorUnitario, setValorUnitario] = useState("");
     const [idResponsavel, setIdResponsavel] = useState("");
     const [maiorIdade, setMaiorIdade] = useState(false);
     const [itens, setItens] = useState([]);
@@ -42,7 +43,7 @@ export default function Vendas() {
 
     const opcoes = (catalogo?.produtos || []).filter(produto => tipos[produto.tipo_produto] && (!tipo || produto.tipo_produto === tipo));
     const selecionado = opcoes.find(produto => String(produto.id_produto) === idProduto);
-    const preco = selecionado ? centavos(selecionado.valor_unitario) : null;
+    const preco = selecionado ? centavos(valorUnitario.trim().replace(",", ".")) : null;
     const subtotal = preco !== null && quantidadeValida(quantidade) ? preco * BigInt(quantidade) : null;
     const total = totalPedido(itens);
     const temAlcool = itens.some(item => item.tipo_produto === "bebida_alcoolica");
@@ -62,7 +63,11 @@ export default function Vendas() {
         setErroItem(""); setSucesso("");
         if (!selecionado) { setErroItem("Selecione um produto da lista."); return; }
         if (!quantidadeValida(quantidade)) { setErroItem("Informe uma quantidade inteira maior que zero, até 2147483647."); return; }
-        if (preco === null) { setErroItem("O preço deste produto é inválido. Peça ao administrador para corrigir o cadastro."); return; }
+        if (preco === null) { setErroItem("Informe o valor unitário de venda, com até 10 dígitos inteiros e 2 decimais, como 9,50. Não use separador de milhar."); return; }
+        const existente = itens.find(item => item.id_produto === selecionado.id_produto);
+        if (existente && centavos(existente.valor_unitario) !== preco) {
+            setErroItem("Este produto já está no pedido com outro preço. Use o mesmo valor ou remova o item e adicione novamente com a quantidade total e o novo preço."); return;
+        }
         const acumulada = jaNoPedido + Number(quantidade);
         if (acumulada > limiteQuantidade) { setErroItem("A quantidade acumulada deste produto ultrapassa o limite permitido."); return; }
         if (selecionado.tipo_produto !== "ficha_sinuca" && acumulada > selecionado.quantidade_produto) {
@@ -83,7 +88,7 @@ export default function Vendas() {
     }
 
     function limparPedido() {
-        setItens([]); setMaiorIdade(false); setIdProduto(""); setQuantidade("1");
+        setItens([]); setMaiorIdade(false); setIdProduto(""); setQuantidade("1"); setValorUnitario("");
         setIdResponsavel(""); setTipo(""); setErroItem(""); setErroPedido(""); setEnvioIncerto(false);
     }
 
@@ -97,7 +102,7 @@ export default function Vendas() {
         trava.current = true; setEnviando(true);
         let enviado = false;
         try {
-            // Atualiza o cadastro antes do POST; alteracoes de preco/tipo exigem revisar o resumo.
+            // Confere tipo e estoque, preservando o preço de venda informado no pedido.
             const [produtos, responsaveis] = await Promise.all([consultar("/produtos"), consultar("/usuarios/responsaveis")]);
             setCatalogo({ produtos, responsaveis });
             if (!responsaveis.some(usuario => String(usuario.id_usuario) === idResponsavel)) {
@@ -107,15 +112,13 @@ export default function Vendas() {
             const revisados = itens.map(item => {
                 const produto = produtos.find(produto => produto.id_produto === item.id_produto);
                 if (!produto || !tipos[produto.tipo_produto]) throw new Error(`${item.nome_produto} não está disponível para venda. Remova o item ou confira seu cadastro.`);
-                const precoAtual = centavos(produto.valor_unitario);
-                if (precoAtual === null) throw new Error(`O preço de ${produto.nome_produto} é inválido. Confira o cadastro.`);
-                if (precoAtual !== centavos(item.valor_unitario) || produto.tipo_produto !== item.tipo_produto) alterado = true;
-                return { ...item, nome_produto: produto.nome_produto, tipo_produto: produto.tipo_produto, valor_unitario: reais(precoAtual) };
+                if (produto.tipo_produto !== item.tipo_produto) alterado = true;
+                return { ...item, nome_produto: produto.nome_produto, tipo_produto: produto.tipo_produto };
             });
             setItens(revisados);
             if (alterado) {
                 setMaiorIdade(false);
-                throw new Error("O preço ou tipo de um produto mudou. Confira o resumo atualizado e finalize novamente.");
+                throw new Error("O tipo de um produto mudou. Confira o resumo atualizado e finalize novamente.");
             }
             for (const item of revisados) {
                 const produto = produtos.find(produto => produto.id_produto === item.id_produto);
@@ -127,7 +130,7 @@ export default function Vendas() {
             enviado = true;
             const venda = await consultar("/vendas", { metodo: "POST", dados: {
                 id_usuario: Number(idResponsavel), confirmacao_maior_idade: temAlcool && maiorIdade,
-                itens: revisados.map(item => ({ id_produto: item.id_produto, quantidade: item.quantidade })),
+                itens: revisados.map(item => ({ id_produto: item.id_produto, quantidade: item.quantidade, valor_unitario: item.valor_unitario })),
             } });
             limparPedido();
             setSucesso(`Venda #${venda.id_venda} registrada. Total: ${dinheiro(venda.valor_total)}. Responsável: ${venda.usuario.nome_completo}.`);
@@ -152,14 +155,14 @@ export default function Vendas() {
                     : !catalogo ? <p className="venda-ajuda" role="status">Carregando produtos e responsáveis…</p>
                         : !catalogo.produtos.length && <p className="venda-ajuda" role="status">Nenhum produto cadastrado. Peça ao administrador para cadastrá-los em Produtos.</p>}
                 <form onSubmit={adicionar} noValidate><fieldset disabled={bloqueado || !catalogo}>
-                    <div className="campo"><label htmlFor="tipo-venda">Tipo do produto</label><select id="tipo-venda" value={tipo} onChange={e => { setTipo(e.target.value); setIdProduto(""); setErroItem(""); }}><option value="">Todos os tipos</option>{Object.entries(tipos).map(([valor, texto]) => <option key={valor} value={valor}>{texto}</option>)}</select></div>
-                    <div className="campo"><label htmlFor="produto-venda">Produto</label><select id="produto-venda" required value={selecionado ? idProduto : ""} onChange={e => { setIdProduto(e.target.value); setErroItem(""); }}><option value="">Selecione um produto</option>{opcoes.map(produto => <option key={produto.id_produto} value={produto.id_produto}>{produto.nome_produto}</option>)}</select>
+                    <div className="campo"><label htmlFor="tipo-venda">Tipo do produto</label><select id="tipo-venda" value={tipo} onChange={e => { setTipo(e.target.value); setIdProduto(""); setValorUnitario(""); setErroItem(""); }}><option value="">Todos os tipos</option>{Object.entries(tipos).map(([valor, texto]) => <option key={valor} value={valor}>{texto}</option>)}</select></div>
+                    <div className="campo"><label htmlFor="produto-venda">Produto</label><select id="produto-venda" required value={selecionado ? idProduto : ""} onChange={e => { setIdProduto(e.target.value); setValorUnitario(""); setErroItem(""); }}><option value="">Selecione um produto</option>{opcoes.map(produto => <option key={produto.id_produto} value={produto.id_produto}>{produto.nome_produto}</option>)}</select>
                         {catalogo && !opcoes.length && <p className="venda-ajuda" role="status">Nenhum produto encontrado para esse tipo.</p>}
                         {selecionado && <p className="venda-ajuda">{selecionado.tipo_produto === "ficha_sinuca" ? "Ficha de sinuca: venda por quantidade, sem controle de estoque." : `Estoque: ${numero(selecionado.quantidade_produto)} unidade(s) · Já no pedido: ${numero(jaNoPedido)}.`}</p>}
                     </div>
                     <div className="venda-campos">
                         <div className="campo"><label htmlFor="quantidade-venda">Quantidade</label><input id="quantidade-venda" type="number" min="1" max={limiteQuantidade} step="1" required value={quantidade} onChange={e => setQuantidade(e.target.value)} /></div>
-                        <div className="campo"><label htmlFor="preco-venda">Valor unitário</label><input id="preco-venda" readOnly value={preco === null ? "—" : dinheiro(reais(preco))} /></div>
+                        <div className="campo"><label htmlFor="preco-venda">Valor unitário de venda (R$)</label><input id="preco-venda" inputMode="decimal" maxLength={13} required placeholder="9,50" value={valorUnitario} onChange={e => setValorUnitario(e.target.value)} /></div>
                         <div className="campo"><label htmlFor="subtotal-venda">Subtotal do item</label><input id="subtotal-venda" readOnly value={subtotal === null ? "—" : dinheiro(reais(subtotal))} /></div>
                         <div className="campo"><label htmlFor="responsavel-venda">Responsável pela venda</label><select id="responsavel-venda" value={responsavelValido ? idResponsavel : ""} onChange={e => setIdResponsavel(e.target.value)}><option value="">Selecione o responsável</option>{(catalogo?.responsaveis || []).map(usuario => <option key={usuario.id_usuario} value={usuario.id_usuario}>{usuario.nome_completo}</option>)}</select></div>
                     </div>
@@ -176,7 +179,7 @@ export default function Vendas() {
                     : <ul className="pedido-itens">{itens.map(item => <li key={item.id_produto}><div><strong>{item.nome_produto}</strong><span>{numero(item.quantidade)} × {dinheiro(item.valor_unitario)}</span><b>{dinheiro(reais(centavos(item.valor_unitario) * BigInt(item.quantidade)))}</b></div><button type="button" disabled={bloqueado} onClick={() => remover(item.id_produto)} aria-label={`Remover ${item.nome_produto} do pedido`}>×</button></li>)}</ul>}
                 <div className="pedido-fechamento">
                     <p className="pedido-total">Total do pedido <strong>{dinheiro(reais(total))}</strong></p>
-                    <p className="venda-nota">Adicionar ao pedido não registra a venda. Os preços e o estoque serão conferidos ao finalizar.</p>
+                    <p className="venda-nota">Informe o preço cobrado do cliente. Subtotais e total são calculados automaticamente. Adicionar ao pedido não registra a venda; o estoque será conferido ao finalizar.</p>
                     {erroPedido && <p className="mensagem erro" role="alert">{erroPedido}</p>}
                     {envioIncerto && <div className="venda-envio-incerto"><a href="#historico-vendas">Consultar histórico</a><button className="atualizar" onClick={() => { limparPedido(); atualizar(); }}>Venda localizada: limpar pedido</button><button className="atualizar" onClick={() => { setEnvioIncerto(false); setErroPedido(""); }}>Venda não localizada: liberar tentativa</button></div>}
                     <button className="botao-primario" disabled={bloqueado || !catalogo || !itens.length} onClick={finalizar}>{enviando ? "Finalizando…" : "Finalizar venda"}</button>

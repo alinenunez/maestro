@@ -148,7 +148,7 @@ export default function Estoque() {
                         <div className="campo"><label htmlFor="valor-entrada">Valor total da compra</label><input id="valor-entrada" value={totalCompraCentavos === null ? "" : dinheiro(reais(totalCompraCentavos))} readOnly placeholder="Informe produto e quantidade" /></div>
                     </div>
                     <div className="campo"><label htmlFor="data-entrada">Data da compra</label><input id="data-entrada" type="date" min="0001-01-01" max="9999-12-31" value={form.data_compra} onChange={e => mudar("data_compra", e.target.value)} required /></div>
-                    <p className="estoque-ajuda">{selecionado && <>Valor unitário cadastrado: <strong>{dinheiro(selecionado.valor_unitario)}</strong>. </>}O valor total é calculado automaticamente pela quantidade e pelo valor unitário. Fichas de sinuca não possuem entradas de estoque.</p>
+                    <p className="estoque-ajuda">{selecionado && <>Custo unitário cadastrado: <strong>{dinheiro(selecionado.valor_unitario)}</strong>. </>}O valor total é calculado automaticamente pela quantidade e pelo valor unitário. Fichas de sinuca não possuem entradas de estoque.</p>
                     {erro && <p className="mensagem erro" role="alert">{erro}</p>}
                     <button className="botao-primario" disabled={!selecionado}>{ocupado ? "Registrando…" : "Registrar entrada"}</button>
                 </fieldset></form>
